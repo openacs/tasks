@@ -21,7 +21,7 @@ ad_page_contract {
 
 set party_count [expr [llength $party_id] + [llength $other_party_ids]]
 if { $party_count > 1 && ![ad_form_new_p -key "task_id"] } {
-    ad_return_error "Not Allowed" "You are not allowed to bulk edit a task for multiple contacts"
+    ad_return_error "[_ tasks.Not_Allowed]" "[_ tasks.lt_You_are_not_allowed_t]"
 }
 
 if { [llength $party_id] > 1 } {
@@ -49,20 +49,20 @@ set package_id [ad_conn package_id]
 set user_id    [ad_maybe_redirect_for_registration]
 set project_id [tasks::project_id]
 
-set title "Add/Edit"
+set title "[_ tasks.AddEdit]"
 set context [list $title]
 
 if { ![ad_form_new_p -key task_id] } {
-    append edit_buttons {
-	{Update save}
-        {{Update and Add New Task} save_add_another}
-        {{Delete} delete}
-    }
+    append edit_buttons [list \
+			     [list "[_ tasks.Update]" save] \
+			     [list "[_ tasks.lt_Update_and_Add_New_Ta]" save_add_another] \
+			     [list "[_ tasks.Delete]" delete]
+			 ]
 } else {
-    set edit_buttons {
-	{{Add Task} save}
-        {{Add Task and Add Another} save_add_another}
-    }
+    set edit_buttons [list \
+			  [list "[_ tasks.Add_Task]" save] \
+			  [list "[_ tasks.lt_Add_Task_and_Add_Anot]" save_add_another]
+		      ]
 }
 
 if { [ns_queryget "formbutton:delete"] != "" } {
@@ -73,7 +73,7 @@ if { [ns_queryget "formbutton:delete"] != "" } {
 
 ad_form -name add_edit \
     -cancel_url $return_url \
-    -cancel_label "Cancel" \
+    -cancel_label "[_ tasks.Cancel]" \
     -edit_buttons $edit_buttons \
     -form {
         task_id:key
@@ -85,30 +85,30 @@ ad_form -name add_edit \
         {names:text(hidden),optional {label {Add Task To}}}
 
         {task_prescribed:text(select),optional
-            {label "Standard Task"}
+            {label "[_ tasks.Standard_Task]"}
 	    {options {
 		{{}                                {}}             
-		{{Delete from Recruiting System}   {Delete from Recruiting System}}	 
-		{{Follow Up Call}		   {Follow Up Call}}		 	
-		{{Follow Up Email}		   {Follow Up Email}}		 
-		{{Have they responded?}		   {Have they responded?}}		 
-		{{Provide Promotional Information} {Provide Promotional Information}}
-		{{Send Letter}			   {Send Letter}}			 
-		{{Send Birthday Card}		   {Send Birthday Card}}		 
-		{{Send Class Schedule}		   {Send Class Schedule}}		 
-		{{Send Personal Note/Letter}	   {Send Personal Note/Letter}}	 
-		{{Send Web Info Card}              {Send Web Info Card}}             
+		{{[_ tasks.lt_Delete_from_Recruitin]}   {[_ tasks.lt_Delete_from_Recruitin]}}	 
+		{{[_ tasks.Follow_Up_Call]}		   {[_ tasks.Follow_Up_Call]}}		 	
+		{{[_ tasks.Follow_Up_Email]}		   {[_ tasks.Follow_Up_Email]}}		 
+		{{[_ tasks.Have_they_responded]}		   {[_ tasks.Have_they_responded]}}		 
+		{{[_ tasks.lt_Provide_Promotional_I]} {[_ tasks.lt_Provide_Promotional_I]}}
+		{{[_ tasks.Send_Letter]}			   {[_ tasks.Send_Letter]}}			 
+		{{[_ tasks.Send_Birthday_Card]}		   {[_ tasks.Send_Birthday_Card]}}		 
+		{{[_ tasks.Send_Class_Schedule]}		   {[_ tasks.Send_Class_Schedule]}}		 
+		{{[_ tasks.lt_Send_Personal_NoteLet]}	   {[_ tasks.lt_Send_Personal_NoteLet]}}	 
+		{{[_ tasks.Send_Web_Info_Card]}              {[_ tasks.Send_Web_Info_Card]}}             
 	    }}
 	}
 
         {task:text(text),optional
-            {label "Custom Task"}
+            {label "[_ tasks.Custom_Task]"}
             {html { maxlength 1000 size 35 }}
             {help_text {You can either use a standard task or a custom task, but not both}}
 	}
 
 	{end_date:text(text)
-	    {label "Due"}
+	    {label "[_ tasks.Due]"}
 	    {html {id date1 size 10 maxlength 10}}
 	    {help_text {if blank there is no due date}}
 	    {after_html {
@@ -130,22 +130,22 @@ ad_form -name add_edit \
 	}
 
         {completed_p:text(checkbox),optional
-            {label "Status"}
+            {label "[_ tasks.Status]"}
             {options {{Completed 1}}}
         }
 
         {priority:integer(select),optional
-            {label "Priority"}
+            {label "[_ tasks.Priority]"}
             {options {{{3 - Very Important} 3} {{2 - Important} 2} {{1 - Normal} 1} {{0 - Not Important} 0}}}
         }
 
         {description:text(textarea),optional,nospell
-            {label "Notes"}
+            {label "[_ tasks.Notes]"}
             {html { rows 6 cols 60 wrap soft}}}
 
     } -new_request {
 
-        set title "Add Task"
+        set title "[_ tasks.Add_Task]"
 	set context [list $title]
 	set status_id "1"
         set priority "1"
@@ -192,11 +192,11 @@ ad_form -name add_edit \
 	set task_prescribed [string trim $task_prescribed]
 	set task [string trim $task]
 	if { [exists_and_not_null task_prescribed] && [exists_and_not_null task] } {
-	    template::element set_error add_edit task_prescribed "Standard tasks are cannot be used in conjunction with custom tasks"
-	    template::element set_error add_edit task "Standard tasks are cannot be used in conjunction with custom tasks"
+	    template::element set_error add_edit task_prescribed "[_ tasks.lt_Standard_tasks_are_ca]"
+	    template::element set_error add_edit task "[_ tasks.lt_Standard_tasks_are_ca]"
 	} elseif { ![exists_and_not_null task_prescribed] && ![exists_and_not_null task] } {
-	    template::element set_error add_edit task_prescribed "Either a custom task or standard task is required"
-	    template::element set_error add_edit task "Either a custom task or standard task is required"
+	    template::element set_error add_edit task_prescribed "[_ tasks.lt_Either_a_custom_task_]"
+	    template::element set_error add_edit task "[_ tasks.lt_Either_a_custom_task_]"
 	} elseif { [exists_and_not_null task_prescribed] } {
 	    set task $task_prescribed
 	}
@@ -232,9 +232,9 @@ ad_form -name add_edit \
 
 	if { [llength $all_parties] == 1 } {
 	    set task_url [export_vars -base task -url {task_id status_id orderby party_id}]
-	    util_user_message -html -message "The task <a href=\"/tasks/${task_url}\">$task</a> was added"
+	    util_user_message -html -message "[_ tasks.lt_The_task_a_hreftaskst]"
 	} else {
-	    util_user_message -html -message "The task \"$task\" was added to $names"	    
+	    util_user_message -html -message "[_ tasks.lt_The_task_task_was_add]"	    
 	}
 
     } -edit_data {
@@ -277,7 +277,7 @@ ad_form -name add_edit \
 	"
 
     	set task_url [export_vars -base task -url {task_id status_id orderby party_id}]
-	util_user_message -html -message "The task <a href=\"/tasks/${task_url}\">$title</a> was updated"
+	util_user_message -html -message "[_ tasks.lt_The_task_a_hreftaskst_1]"
 
 
     } -after_submit {
@@ -298,7 +298,7 @@ if { ![ad_form_new_p -key task_id] } {
 	-datatype "text" \
 	-widget "inform" \
 	-label "" \
-	-value "Originally created by <a href=\"[contact::url -party_id $creation_id]\">[contact::name -party_id $creation_id]</a>" \
+	-value "[_ tasks.lt_Originally_created_by]" \
 	-optional
 } else {
     if { $party_count > 1 } {
