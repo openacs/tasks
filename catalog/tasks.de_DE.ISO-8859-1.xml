@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<message_catalog package_key="tasks" package_version="0.1d" locale="de_DE" charset="ISO-8859-1">
+
+  <msg key="Add_Task">Aufgabe hinzufügen</msg>
+  <msg key="Assign_Process">Prozess zuweisen</msg>
+  <msg key="Cancel">Abbrechen</msg>
+  <msg key="Created_By">Erstellt von</msg>
+  <msg key="Custom_Task">Spezifische Aufgabe</msg>
+  <msg key="Date">Datum</msg>
+  <msg key="Due">Fällig</msg>
+  <msg key="Follow_Up_Call">Follow Up Anruf</msg>
+  <msg key="Follow_Up_Email">Follow Up e-Mail</msg>
+  <msg key="Have_they_responded">Haben Sie geantwortet?</msg>
+  <msg key="lt_Add_Task_and_Add_Anot">Eine Aufgabe und einen weitere hinzufügen </msg>
+  <msg key="lt_Delete_from_Recruitin">Vom Recruiting System löschen</msg>
+  <msg key="lt_Provide_Promotional_I">Unterlagen zuschicken</msg>
+  <msg key="lt_Send_Personal_NoteLet">Notiz/Brief zuschicken</msg>
+  <msg key="Not_Done">Nicht erledigt</msg>
+  <msg key="Notes">Notizen</msg>
+  <msg key="Priority">Priorität</msg>
+  <msg key="Process">Prozess</msg>
+  <msg key="Send_Birthday_Card">Geburtstagskarte schicken</msg>
+  <msg key="Send_Letter">Brief schicken</msg>
+  <msg key="Send_Web_Info_Card">Web Info Card schicken</msg>
+  <msg key="Standard_Task">Standard Aufgabe</msg>
+  <msg key="Status">Status</msg>
+  <msg key="Task">Aufgabe</msg>
+</message_catalog>
