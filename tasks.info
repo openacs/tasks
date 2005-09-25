@@ -14,8 +14,11 @@
 
         <provides url="tasks" version="0.1d"/>
         <requires url="project-manager" version="2.70a1"/>
+        <requires url="workflow" version="2.0.0b4"/>
 
         <callbacks>
+            <callback type="after-install"  proc="tasks::install::package_install"/>
+            <callback type="after-upgrade"  proc="tasks::install::after_upgrade"/>
         </callbacks>
         <parameters>
         <!-- No version parameters -->

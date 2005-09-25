@@ -5,10 +5,15 @@ ad_library {
     Callback procs for Tasks
     
     @author Matthew Geddert (openacs@geddert.com)
+    @author Timo Hentschel (timo@timohentschel.de)
     @creation-date 2005-06-15
     @arch-tag: 200d82ba-f8e7-4f19-9740-39117474766f
     @cvs-id $Id$
 }
+
+namespace eval tasks::workflow {}
+namespace eval tasks::workflow::impl {}
+namespace eval tasks::workflow::impl::action_side_effect {}
 
 ad_proc -public -callback contact::history -impl tasks {
     {-party_id:required}
@@ -56,4 +61,59 @@ ad_proc -public -callback contacts::bulk_actions -impl tasks {
     Add task history to this party. Return as list
 } {
     ::template::multirow append $multirow "Add Task" "/tasks/task" "Add a task to the selected contacts"
+}
+
+
+ad_proc -public tasks::workflow::impl::action_side_effect::do {
+    case_id
+    object_id
+    action_id
+    entry_id
+} {
+    create new tasks linked to this action
+} {
+    db_1row process_id {
+	select process_instance_id, process_id, party_id
+	from t_process_instances
+	where case_id = :case_id
+    }
+
+    set tasks [db_list_of_lists process_tasks {
+	select task_id, title, description,
+               mime_type, comment, status_id, priority,
+	       to_char((now()+ (start::varchar || ' days')::interval), 'YYYY-MM-DD') as start_date,
+	       to_char((now()+ (due::varchar || ' days')::interval), 'YYYY-MM-DD') as due_date
+	from t_process_tasks
+	where open_action_id = :action_id
+    }]
+
+    foreach task $tasks {
+	util_unlist $task process_task_id title description mime_type comment status_id priority start_date due_date
+
+	set new_task_id [tasks::task::new \
+			    -process_instance_id $process_instance_id \
+			    -process_task_id $process_task_id \
+			    -party_id $party_id \
+			    -object_id $object_id \
+			    -title $title \
+			    -description $description \
+			    -mime_type $mime_type \
+			    -comment $comment \
+			    -status_id $status_id \
+			    -priority $priority \
+			    -start_date $start_date \
+			    -due_date $due_date]
+    }
+}
+
+ad_proc -public tasks::workflow::impl::action_side_effect::object_type {} {
+    Get the object type for which this implementation is valid.
+} {
+    return "acs_object"
+}
+
+ad_proc -public tasks::workflow::impl::action_side_effect::pretty_name {} {
+    Get the pretty name of this implementation.
+} {
+    return "tasks"
 }
