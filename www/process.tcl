@@ -12,11 +12,10 @@ ad_page_contract {
     @return use_link the link to use this process
 
 } {
-
     process_id:integer,notnull
+    {assignee_id:integer,optional ""}
     orderby:optional
     {project_item_id ""}
-    
 } -properties {
     process_id:onevalue
     context_bar:onevalue
@@ -42,8 +41,11 @@ set use_uncertain_completion_times_p [parameter::get -parameter "UseUncertainCom
 
 # set up context bar, needs parent_id
 
-db_1row get_process_info { select * from pm_process where process_id = :process_id }
-set title $one_line
+db_1row get_process_info {
+    select title
+    from t_processes
+    where process_id = :process_id
+}
 set context [list [list processes "Processes"] $title]
 
 set use_link "<a href=\"[export_vars -base task-select-project {process_id project_item_id}]\"><img border=\"0\" src=\"/shared/images/go.gif\"></a>"
@@ -54,17 +56,19 @@ set elements \
          priority {
 	     label "Priority"
 	 } \
-         one_line {
+         title {
              label "Subject"
-             display_template {<a href="process-task?process_id=[set process_id]&process_task_id=@tasks.process_task_id@">@tasks.task@</a>
+             display_template {<a href="process-task?process_id=$process_id&assignee_id=$assignee_id&process_task_id=@tasks.process_task_id@">@tasks.task@</a>
              }
          } \
-         deadline {
+	 start {
+	     label "Start"
+	 } \
+         due {
 	     label "Due"
-	     display_template {
-		 <if @tasks.due_interval@ not nil>@tasks.due_interval@ after assignment</if>
-		 <if @tasks.due_date@ not nil>@tasks.pretty_due_date@</if>
-	     }
+	 } \
+         after_task {
+	     label "After"
 	 } \
 	]    
 
@@ -76,17 +80,17 @@ template::list::create \
     -key process_task_id \
     -elements $elements \
     -actions [list \
-		  "Add Process Task" [export_vars -base process-task -url {process_id}] "Add Process Task" \
-		  "Edit Process" [export_vars -base process-add-edit -url {process_id}] "Edit Process Title/Description" \
-		  "Delete Process" [export_vars -base process-delete -url {process_id}] "Delete this Process" \
-		  "Cancel" "processes" "Return to all processes" \
+		  "Add Process Task" [export_vars -base process-task -url {process_id assignee_id}] "Add Process Task" \
+		  "Edit Process" [export_vars -base process-add-edit -url {process_id assignee_id}] "Edit Process Title/Description" \
+		  "Delete Process" [export_vars -base process-delete -url {process_id assignee_id}] "Delete this Process" \
+		  "Cancel" [export_vars -base processes -url {assignee_id}] "Return to all processes" \
 		 ] \
     -orderby {
         default_value ordering,desc
         ordering {
             label "Order"
-            orderby_asc "tp.priority asc, tp.due_date, tp.due_interval, upper(pm.one_line)"
-            orderby_desc "tp.priority desc, tp.due_date, tp.due_interval, upper(pm.one_line)"
+            orderby_asc "tp.priority asc, tp.due, lower(tp.title)"
+            orderby_desc "tp.priority desc, tp.due, lower(tp.title)"
             default_direction desc
         }
     } \
@@ -95,20 +99,16 @@ template::list::create \
     } \
     -bulk_action_export_vars {
         process_id
-        project_item_id
+	assignee_id
     } \
     -sub_class {
         narrow
     } \
     -filters {
         process_id {}
-    } \
-    -html {
-        width 100%
     }
 
 
 db_multirow -extend { item_url } tasks task_query {
 } {
 }
-

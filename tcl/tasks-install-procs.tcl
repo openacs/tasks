@@ -40,5 +40,20 @@ ad_proc -public tasks::install::after_upgrade {
         -from_version_name $from_version_name \
         -to_version_name $to_version_name \
         -spec {
+	    0.1d 0.1d1 {
+		set spec {
+		    name "Tasks_Action_SideEffect"
+		    aliases {
+			GetObjectType tasks::workflow::impl::action_side_effect::object_type
+			GetPrettyName tasks::workflow::impl::action_side_effect::pretty_name
+			DoSideEffect  tasks::workflow::impl::action_side_effect::do
+		    }  
+		}
+
+		lappend spec contract_name [workflow::service_contract::action_side_effect]
+		lappend spec owner tasks
+
+		acs_sc::impl::new_from_spec -spec $spec
+	    }
 	}
 }

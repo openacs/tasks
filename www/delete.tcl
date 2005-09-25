@@ -20,10 +20,11 @@ if { [string is false $confirm_p] } {
 	ad_returnredirect ./
 	return
     }
-    set task_pretty [ad_decode $num_entries 1 "[_ tasks.a_Task]" "[_ tasks.Tasks]"]
+    set task_pretty [ad_decode $num_entries 1 "[_ tasks.Task]" "[_ tasks.Tasks]"]
     set title "[_ tasks.Delete_task_pretty]"
     set context [list $title]
-    set task2_pretty [ad_decode $num_entries 1 "[_ tasks.this_task]" "[_ tasks.lt_these_num_entries_tas]"]
+    set task2_pretty [ad_decode $num_entries 1 "[_ tasks.this_task]" "[_ tasks.these_tasks]"]
+    set context [list $title]
     set question "[_ tasks.lt_Are_you_sure_you_want_1]"
     set yes_url "delete?[export_vars { task_id:multiple { confirm_p 1 } return_url}]"                                                    
     set no_url "${return_url}"
@@ -34,17 +35,15 @@ if { [string is false $confirm_p] } {
 set task_titles [list]
 foreach task_id $task_id {
     lappend task_titles [db_string get_task_title {
-	    select cr.title as task
-              from pm_tasks_revisions ptr,
-                   cr_revisions cr,
-                   cr_items ci
-             where ci.item_id = :task_id
-               and ci.latest_revision = ptr.task_revision_id
-               and ci.live_revision = ptr.task_revision_id
-               and ptr.task_revision_id = cr.revision_id
-            
+	select t.title
+	from t_tasks
+	where t.task_id = :task_id
     }]
-    db_dml mark_delete "update pm_tasks set deleted_p = 't' where task_id = :task_id"
+    db_dml mark_delete {
+	update t_tasks
+	set status_id = null
+	where task_id = :task_id
+    }
 }
 
 if { $num_entries > 1 } {
@@ -61,12 +60,9 @@ if { $num_entries > 1 } {
     }
     util_user_message -html -message "[_ tasks.lt_The_tasks_task_list_w]"
 } else {
+    set task_title [lindex $task_titles 0]
     util_user_message -html -message "[_ tasks.lt_The_task_lindex_task_]"
 }
 
 ad_returnredirect $return_url
 ad_script_abort
-
-
-
-

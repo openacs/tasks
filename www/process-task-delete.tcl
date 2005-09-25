@@ -8,6 +8,7 @@ ad_page_contract {
     {process_task_id:integer,multiple}
     {confirm_p:boolean 0}
     {status_id:integer ""}
+    {assignee_id:integer,optional}
     {process_id:integer,notnull}
     {orderby ""}
 }
@@ -25,8 +26,8 @@ if { [string is false $confirm_p] } {
     set title "Delete [ad_decode $num_entries 1 "a Process Task" "Process Tasks"]"
     set context [list $title]
     set question "Are you sure you want to delete [ad_decode $num_entries 1 "this process task" "these $num_entries process tasks"]?"
-    set yes_url [export_vars -base process-task-delete -url { process_task_id:multiple { confirm_p 1 } status_id orderby process_id }]                                                    
-    set no_url [export_vars -base process -url { process_id status_id orderby }]
+    set yes_url [export_vars -base process-task-delete -url { process_task_id:multiple { confirm_p 1 } assignee_id status_id orderby process_id }]                                                    
+    set no_url [export_vars -base process -url { process_id assignee_id status_id orderby }]
     return
 }
 
@@ -37,21 +38,15 @@ set task_titles [list]
 db_transaction {
     foreach process_task_id $process_task_id {
 	lappend task_titles [db_string get_task_title {
-	    select one_line
-              from pm_process_task
-             where process_task_id = :process_task_id
+	    select title
+              from t_process_tasks
+             where task_id = :process_task_id
                and process_id = :process_id
 	}]
 	db_dml mark_delete {
-	    delete
-              from tasks_pm_process_task
-             where process_task_id = :process_task_id
-	}
-	db_dml mark_delete {
-	    delete
-              from pm_process_task
-             where process_task_id = :process_task_id
-               and process_id = :process_id
+	    update t_process_tasks
+            set status_id = null
+	    where task_id = :process_task_id
 	}
     }
 }
@@ -72,9 +67,5 @@ if { $num_entries > 1 } {
     util_user_message -html -message "The process task \"[lindex $task_titles 0]\" was deleted"
 }
 
-ad_returnredirect [export_vars -base process -url { process_id status_id orderby }]
+ad_returnredirect [export_vars -base process -url { process_id assignee_id status_id orderby }]
 ad_script_abort
-
-
-
-

@@ -3,17 +3,14 @@
 
   <fullquery name="task_query">
     <querytext>
-	    select pm.process_task_id,
-                   pm.one_line as task,
-                   pm.description,
-                   tp.due_interval,
-                   tp.due_date,
-	           CASE WHEN to_char(tp.due_date,'YYYY') = to_char(now(),'YYYY') THEN to_char(tp.due_date,'Mon DD (Dy)') ELSE to_char(tp.due_date,'Mon DD, YYYY (Dy') END as pretty_due_date,
-                   tp.priority
-              from pm_process_task pm,
-                   tasks_pm_process_task tp
-             where pm.process_id = :process_id
-               and pm.process_task_id = tp.process_task_id
+	    select tp.task_id as process_task_id, tp.title as task,
+                   tp.description, tp.priority, tp.due, tp.start,
+                   tp2.title as after_task, tp2.task_id as after_task_id
+              from t_process_tasks tp
+	      left outer join t_process_tasks tp2
+                on (tp2.closing_action_id = tp.open_action_id)
+             where tp.process_id = :process_id
+               and tp.status_id is not null
         [template::list::orderby_clause -orderby -name tasks]
     </querytext>
   </fullquery>

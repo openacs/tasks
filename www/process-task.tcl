@@ -12,29 +12,26 @@ ad_page_contract {
 } {
     process_id:integer,notnull
     process_task_id:integer,optional
+    assignee_id:integer,optional
     status_id:integer,optional
     orderby:optional
 } -properties {
 } -validate {
     valid_process_id -requires process_id {
-	if { ![db_0or1row process_exists_p { select 1 from pm_process where process_id = :process_id}] } {
+	if { ![db_0or1row process_exists_p { select 1 from t_processes where process_id = :process_id}] } {
 	    ad_complain "The process_id specified is not valid"
-	}
-    }
-    valid_party_id -requires process_id {
-	set process_owner [db_string process_manager { select party_id from pm_process where process_id = :process_id}]
-	if { $process_owner != [ad_conn user_id] || ![permission::permission_p -object_id [ad_conn package_id] -privilege admin] } {
-		ad_complain "The process specified belongs to [db_string process_manager { select person__name(party_id) from pm_process where process_id = :process_id}]. Please ask that person or a website administrator to edit tasks on this process or assign it to you so you can manage it."
 	}
     }
 }
 
 
-
 set package_id [ad_conn package_id]
 set user_id    [ad_maybe_redirect_for_registration]
-set project_id [tasks::project_id]
-set process    [db_string process_get { select one_line from pm_process where process_id = :process_id}]
+db_1row process_get {
+    select title as process, workflow_id
+    from t_processes
+    where process_id = :process_id
+}
 
 if { [ad_form_new_p -key process_task_id] } {
     set title "Add Process Task"
@@ -45,10 +42,9 @@ if { [ad_form_new_p -key process_task_id] } {
 } else {
     set title "Edit: "
     append title [db_string get_task_name {
-	    select pm.one_line
-              from pm_process_task pm
-             where pm.process_task_id = :process_task_id
-               and pm.process_id = :process_id
+	    select title
+              from t_process_tasks
+             where task_id = :process_task_id
     }]
     append edit_buttons {
 	{Update save}
@@ -56,59 +52,50 @@ if { [ad_form_new_p -key process_task_id] } {
         {{Delete} delete}
     }
 }
-set context [list [list "processes" Processes] [list [export_vars -base "process" -url {process_id}] $process] $title]
+set context [list [list "processes" Processes] [list [export_vars -base "process" -url {process_id assignee_id}] $process] $title]
 
+set status_options [db_list_of_lists status_options {
+    select title, status_id
+    from t_task_status
+    order by status_id
+}]
+set status_options [lang::util::localize $status_options]
 
+set open_options [db_list_of_lists open_action_options {
+    select title, closing_action_id
+    from t_process_tasks
+    where process_id = :process_id
+    and status_id is not null
+    order by lower(title)
+}]
+set open_options [concat [list [list "-- new --" ""]] $open_options]
 
 if { [ns_queryget "formbutton:delete"] != "" } {
-    ad_returnredirect [export_vars -base "process-task-delete" -url {process_id process_task_id status_id orderby}]
+    ad_returnredirect [export_vars -base "process-task-delete" -url {process_id process_task_id assignee_id status_id orderby}]
     ad_script_abort
 }
 
 ad_form -name add_edit \
-    -cancel_url [export_vars -base "process" -url {process_id}] \
+    -cancel_url [export_vars -base "process" -url {process_id assignee_id}] \
     -cancel_label "Cancel" \
     -edit_buttons $edit_buttons \
     -form {
         process_task_id:key
         process_id:integer(hidden)
+        workflow_id:integer(hidden)
 
+        assignee_id:integer(hidden),optional
         status_id:integer(hidden),optional
         orderby:text(hidden),optional
 
-
         {task:text(text)
             {label "Process Task"}
-            {html { size 28 maxlength 50}}
+            {html { size 80 maxlength 200}}
 	}
         
-    {due_date:text(text),optional
-        {label "Default Hard Deadline"}
-	{html {id date1 size 10 maxlength 10}}
-        {help_text {if blank there is no default deadline}}
-	{after_html {
-<button type=\"reset\" id=\"f_date_b1\">YYYY-MM-DD</button>
-<script type=\"text/javascript\">
-    Calendar.setup({
-        inputField     :    \"date1\",       // id of the input field, put readonly 1 in html to limit input 
-        ifFormat       :    \"%Y-%m-%d\",   // Format the input field
-        daFormat       :    \"%m %d %Y\",   // Format for the display area
-        showsTime      :    false,          // will display a time selector
-        button         :    \"f_date_b1\",   // trigger for the calendar (button ID)
-        singleClick    :    true,           // double-click mode
-        step           :    1,              // show all years in drop-down boxes (instead of every other year as default)
-        weekNumbers    :    false,          // do not show the week numbers
-        showOthers     :    false           // show days belonging to other months
-    });
-</script>
-	}}}
-    
-
-        {due_days:integer(text),optional
-            {label "Default Variable Deadline"}
-            {html {size 3 maxlength 3}}
-            {help_text {Variable deadlines that fall on Saturday or Sunday will automatically be pushed to the next Monday}}
-            {after_html {days after assignment}}
+        {status:text(select)
+            {label "[_ tasks.Status]"}
+            {options $status_options}
         }
 
         {priority:integer(select),optional
@@ -116,105 +103,110 @@ ad_form -name add_edit \
             {options {{{3 - Very Important} 3} {{2 - Important} 2} {{1 - Normal} 1} {{0 - Not Important} 0}}}
         }
 
+        {open_action_id:integer(select),optional
+            {label "After"}
+            {options $open_options}
+        }
+
         {description:text(textarea),optional,nospell
             {label "Notes"}
             {html { rows 5 cols 50 wrap soft}}}
 
+        {comment:text(textarea),optional,nospell
+            {label "[_ tasks.Comment]"}
+            {html { rows 5 cols 50 wrap soft}}}
+
+        {start:integer(text),optional
+            {label "Variable Start"}
+            {html {size 3 maxlength 3}}
+            {help_text {Variable start that fall on Saturday or Sunday will automatically be pushed to the next Monday}}
+            {after_html {days after assignment}}
+        }
+
+        {due:integer(text),optional
+            {label "Variable Deadline"}
+            {html {size 3 maxlength 3}}
+            {help_text {Variable deadlines that fall on Saturday or Sunday will automatically be pushed to the next Monday}}
+            {after_html {days after assignment}}
+        }
+
     } \
     -new_request {
 
-	set status_id "1"
+	set status "1"
         set priority "1"
+	set start 0
+	set due 0
 
     } -edit_request {
 
 	db_1row get_task_info {
-	    select pm.one_line as task,
-                   pm.description,
-                   tp.due_interval,
-                   tp.due_date,
-                   tp.priority
-              from pm_process_task pm,
-                   tasks_pm_process_task tp
-             where pm.process_task_id = :process_task_id
-               and pm.process_id = :process_id
-               and pm.process_task_id = tp.process_task_id
+	    select title as task, description, status_id as status, priority,
+	           start, due, comment, open_action_id
+              from t_process_tasks
+             where task_id = :process_task_id
+               and process_id = :process_id
      	}
-	set due_days [lindex $due_interval 0]
 
-    } -validate {
-	{due_date 
-	    {[calendar::date_valid_p -date $due_date]}
-	    {This is not a valid date. Either the date doesn't exist or it is not formatted correctly. Correct formatting is: YYYY-MM-DD or YYYYMMDD}
-	}
-	{due_date
-	    { [expr \
-	          [expr [string equal $due_date ""] == 1 && [string equal [string trim $due_days] ""] == 1] || \
-		  [expr [string equal $due_date ""] == 1 && [string equal [string trim $due_days] ""] == 0] || \
-		  [expr [string equal $due_date ""] == 0 && [string equal [string trim $due_days] ""] == 1]
-	      ]}
-	    {You may either use a Hard Deadline, a Variable Deadline or neither but not both}
-	}
-	{due_days
-	    { [expr \
-	          [expr [string equal $due_date ""] == 1 && [string equal [string trim $due_days] ""] == 1] || \
-		  [expr [string equal $due_date ""] == 1 && [string equal [string trim $due_days] ""] == 0] || \
-		  [expr [string equal $due_date ""] == 0 && [string equal [string trim $due_days] ""] == 1]
-	      ]}
-	    {You may either use a Hard Deadline, a Variable Deadline or neither but not both}
-	}
     } -on_submit {
-        set user_id [ad_conn user_id]
-        set peeraddr [ad_conn peeraddr]
-	if { [exists_and_not_null due_days] } {
-	    set due_interval "${due_days} days"
-	} else {
-	    set due_interval ""
-	}
-	set process_task_url [export_vars -base "/tasks/process-task" -url {process_id process_task_id}]
+	set process_task_url [export_vars -base "/tasks/process-task" -url {process_id process_task_id assignee_id}]
     } -new_data {
 	db_transaction {
-	    db_dml insert_pm_process_task {
-		insert into pm_process_task
-                ( process_task_id, process_id, one_line, description, mime_type )
-		values
-		( :process_task_id, :process_id, :task, :description, 'text/plain' )
+
+	    set state_id [workflow::state::fsm::get_id -workflow_id $workflow_id -short_name new]
+	    
+	    set closing_action_id [workflow::action::fsm::new \
+				       -workflow_id $workflow_id \
+				       -short_name "tasks_action_$process_task_id" \
+				       -pretty_name "task action $process_task_id" \
+				       -enabled_state_ids $state_id \
+				       -new_state_id $state_id \
+				       -callbacks "tasks.Tasks_Action_SideEffect"]
+
+	    if {[empty_string_p $open_action_id]} {
+		set open_action_id [workflow::action::get_id -workflow_id $workflow_id -short_name new]
 	    }
-	    db_dml insert_tasks_pm_process_task {
-		insert into tasks_pm_process_task
-                ( process_task_id, due_interval, due_date, priority )
-		values
-                ( :process_task_id, :due_interval, :due_date, :priority )
-	    }
+
+	    set process_task_id [tasks::process::task::new \
+				     -task_id $process_task_id \
+				     -process_id $process_id \
+				     -open_action_id $open_action_id \
+				     -closing_action_id $closing_action_id \
+				     -title $task \
+				     -description $description \
+				     -mime_type "text/plain" \
+				     -comment $comment \
+				     -status_id $status \
+				     -priority $priority \
+				     -start $start \
+				     -due $due]
+
 	    util_user_message -html -message "The process task <a href=\"${process_task_url}\">$task</a> was added"
 	}
 
 
     } -edit_data {
-	db_transaction {
-	    db_dml update_pm_process_task {
-		update pm_process_task
-                   set one_line = :task,
-		       description = :description
-                 where process_task_id = :process_task_id
-                   and process_id = :process_id
-	    }
-	    db_dml update_tasks_pm_process_task {
-		update tasks_pm_process_task
-                   set due_interval = :due_interval,
-		       due_date = :due_date,
-                       priority = :priority
-                 where process_task_id = :process_task_id
-	    }
-	    util_user_message -html -message "The process task <a href=\"${process_task_url}\">$task</a> was updated"
-	}
+
+    tasks::process::task::edit \
+	-task_id $process_task_id \
+	-open_action_id $open_action_id \
+	-title $task \
+	-description $description \
+	-mime_type "text/plain" \
+	-comment $comment \
+	-status_id $status \
+	-priority $priority \
+	-start $start \
+	-due $due
+
+    util_user_message -html -message "The process task <a href=\"${process_task_url}\">$task</a> was updated"
 
     } -after_submit {
 
 	if { [ns_queryget "formbutton:save_add_another"] != "" } {
-	    set return_url [export_vars -url -base "process-task" {process_id}]
+	    set return_url [export_vars -url -base "process-task" {process_id assignee_id}]
 	} else {
-	    set return_url [export_vars -url -base "process" {process_id}]
+	    set return_url [export_vars -url -base "process" {process_id assignee_id}]
 	}
 	ad_returnredirect $return_url
 	ad_script_abort

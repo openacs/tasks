@@ -14,6 +14,7 @@ ad_page_contract {
 } {
     {process_id:integer,notnull}
     {assignee_id:integer,notnull}
+    {object_id:integer,optional ""}
 } -properties {
 
     context_bar:onevalue
@@ -28,42 +29,25 @@ ad_page_contract {
 }
 
 
-set process [db_string get_rpocess { select one_line from pm_process where process_id = :process_id }]
-set project_id [tasks::project_id]
-set instance_id [pm::process::instantiate -process_id $process_id -project_item_id $project_id -name $process]
+db_1row get_process {
+    select title as process, workflow_id
+    from t_processes
+    where process_id = :process_id
+}
 
 db_transaction {
 
-db_foreach task_in_process {
-    select *,
-           CASE WHEN due_date is null and due_interval is null THEN ''::varchar ELSE
-                   CASE WHEN due_date is not null THEN to_char(due_date,'YYYY-MM-DD') ELSE
-                     to_char((now()+due_interval),'YYYY-MM-DD')
-                   END
-           END as end_date
-      from pm_process_task, tasks_pm_process_task
-     where process_id = :process_id
-       and pm_process_task.process_task_id = tasks_pm_process_task.process_task_id 
-} {
+    set case_id [db_nextval acs_object_id_seq]
 
-            set task_id [pm::task::new -project_id ${project_id} \
-                         -process_instance_id $instance_id \
-			 -title ${one_line} \
-			 -description ${description} \
-                         -mime_type ${mime_type} \
-			 -end_date ${end_date} \
-			 -percent_complete "0" \
-			 -creation_user [ad_conn user_id] \
-			 -creation_ip [ad_conn peeraddr] \
-			 -package_id [ad_conn package_id] \
-			 -priority ${priority}]
-	pm::task::assign -task_item_id $task_id -party_id $assignee_id
+    tasks::process::instance::new \
+	-process_id $process_id \
+	-case_id $case_id \
+	-object_id $object_id
 
-	    set task_url [export_vars -base task -url {task_id status_id orderby {party_id $assignee_id}}]
-	util_user_message -html -message "The task <a href=\"/tasks/${task_url}\">$one_line</a> was added with a due date of $end_date"
-
+    workflow::case::new -no_notification \
+	-case_id $case_id \
+	-workflow_id $workflow_id \
+	-object_id $object_id
 }
-}
-
 
 ad_returnredirect [export_vars -base "contact" -url {{party_id $assignee_id}}]

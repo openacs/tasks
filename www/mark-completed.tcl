@@ -11,7 +11,6 @@ ad_page_contract {
     {orderby ""}
     {return_url:notnull}
 }
-#    {party_id:integer,notnull}
 
 set num_entries [llength $task_id]
 
@@ -21,31 +20,30 @@ if { [string is false $confirm_p] } {
 	ad_returnredirect ./
 	return
     }
-    set title "Mark [ad_decode $num_entries 1 "Task" "Tasks"] as Done"
+    set pretty_task [ad_decode $num_entries 1 "[_ tasks.Task]" "[_ tasks.Tasks]"]
+    set title "[_ tasks.Mark_Done]"
     set context [list $title]
-    set question "Are you sure you want to mark [ad_decode $num_entries 1 "this task" "these $num_entries tasks"] as done?"
-    set yes_url "mark-done?[export_vars { task_id:multiple { confirm_p 1 } status_id orderby party_id}]"                                                    
+    set pretty_entries [ad_decode $num_entries 1 "[_ tasks.this_task]" "[_ tasks.these_tasks]"]
+    set question "[_ tasks.completed_sure]"
+    set yes_url "mark-completed?[export_vars { task_id:multiple { confirm_p 1 } status_id orderby party_id}]"                                                    
     set no_url "./?[export_vars { status_id orderby party_id}]"
     return
 }
 
 set user_id [ad_conn user_id]
 
-set task_titles [list]
-foreach task_id $task_id {
-    set task_title [db_string get_task_title {
-	    select cr.title as task
-              from pm_tasks_revisions ptr,
-                   cr_revisions cr,
-                   cr_items ci
-             where ci.item_id = :task_id
-               and ci.latest_revision = ptr.task_revision_id
-               and ci.live_revision = ptr.task_revision_id
-               and ptr.task_revision_id = cr.revision_id
-            
-    }]
-    lappend task_titles "<a href=\"[export_vars -base "task" -url {task_id status_id orderby}]\">${task_title}</a>"
-    pm::task::update_percent -task_item_id $task_id -percent_complete "100"
+db_transaction {
+    set task_titles [list]
+    foreach task_id $task_id {
+	set task_title [db_string get_task_title {
+	    select t.title
+	    from t_tasks t
+	    where t.task_id = :task_id
+	}]
+	lappend task_titles "<a href=\"[export_vars -base "task" -url {task_id status_id orderby}]\">${task_title}</a>"
+
+	tasks::task::complete -task_id $task_id
+    }
 }
 
 
@@ -61,15 +59,11 @@ if { $num_entries > 1 } {
 	append task_list "\"${task_title}\""
 	incr num
     }
-    util_user_message -html -message "The tasks ${task_list} were marked done"
+    util_user_message -html -message "[_ tasks.tasks_completed]"
 } else {
-    util_user_message -html -message "The task \"[lindex $task_titles 0]\" was marked done"
+    set task_title [lindex $task_titles 0]
+    util_user_message -html -message "[_ tasks.task_completed]"
 }
-#util_user_message -message "[ad_decode $num_entries 1 "One task" "$num_entries tasks"] marked done."
 
 ad_returnredirect $return_url
 ad_script_abort
-
-
-
-

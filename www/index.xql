@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <queryset>
 
-<fullquery name="tasks_pagination">
+<fullquery name="tasks_pagination_old">
       <querytext>
     select pt.task_id
       from cr_items ci,
@@ -34,7 +34,7 @@
       </querytext>
 </fullquery>
 
-<fullquery name="tasks_count">
+<fullquery name="tasks_count_old">
       <querytext>
     select count(*)
       from cr_items ci,
@@ -66,7 +66,7 @@
       </querytext>
 </fullquery>
 
-<fullquery name="tasks_select">      
+<fullquery name="tasks_select_old">      
       <querytext>
     select pt.task_id,
            tasks__relative_date(ptr.end_date) as end_date,

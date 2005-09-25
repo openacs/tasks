@@ -23,7 +23,6 @@ ad_page_contract {
     {searchterm ""}
     {mine_p "t"}
     {status_id "1"}
-    {role_id "2"}
     {process_instance:integer,optional}
 } -properties {
     task_term:onevalue
@@ -43,23 +42,15 @@ if { ![exists_and_not_null orderby] } {
 if { ![exists_and_not_null status_id] } {
     set status_id "1"
 }
-set done_url [export_vars -url -base "./contact" {orderby {status_id 2} party_id}]
-set not_done_url [export_vars -url -base "./contact" {orderby {status_id 1} party_id}]
-set return_url [export_vars -base "/tasks/contact" -url {orderby status_id party_id}]
+set done_url [export_vars -url -base "contact" {orderby {status_id 2} party_id}]
+set not_done_url [export_vars -url -base "contact" {orderby {status_id 1} party_id}]
+set return_url [export_vars -base [ad_conn url] -url {orderby status_id party_id}]
 set add_url [export_vars -base task {return_url orderby status_id party_id}]
 set add_event_url [export_vars -base "/calendar/cal-item-new" -url {return_url party_id}]
 
-set admin_p [permission::permission_p -object_id [ad_conn package_id] -privilege admin]
-set task_term [ad_conn instance_name]
+set package_id [ad_conn package_id]
+set admin_p [permission::permission_p -object_id $package_id -privilege admin]
 set context {}
-
-#    -bulk_actions {
-#	"Mark Completed" "mark-completed" "Mark Completed"
-#	"Delete" "delete" "Delete"
-#    } \
-#    -bulk_action_export_vars {
-#        {return_url} {orderby} {party_id}
-#    } \
 
 
 template::list::create \
@@ -93,15 +84,19 @@ template::list::create \
 		</if>
 	    }
 	}
-        process {
+        process_title {
 	    label "[_ tasks.Process]"
 	    display_template {
-		<if @tasks.done_p@><span class="done">@tasks.process@</span></if>
+		<if @tasks.done_p@><span class="done">@tasks.process_title@</span></if>
                 <else>
-		  <if @tasks.process@ not nil>
-		<a href="@tasks.process_minus_url@" style="text-decoration: none; font-weight: bold;">&laquo;</a>&nbsp;@tasks.process@&nbsp;<a href="@tasks.process_plus_url@" style="text-decoration: none; font-weight: bold;">&raquo;</a>
-                  </if>
+		  <if @tasks.process_title@ not nil>@tasks.process_title@</if>
 		</else>
+	    }
+	}
+        contact {
+	    label "[_ tasks.Contact]"
+	    display_template {
+		<if @tasks.object_id@ not nil><a href="@tasks.contact_url@">@tasks.contact@</a></if>
 	    }
 	}
         date {
@@ -109,8 +104,8 @@ template::list::create \
 	    display_template {
 		<if @tasks.done_p@><span class="done">@tasks.completed_date;noquote@</span></if>
                 <else>
-		  <if @tasks.end_date@>
-		<a href="@tasks.task_minus_url@" style="text-decoration: none; font-weight: bold;">&laquo;</a>&nbsp;<if @tasks.end_date_passed_p@><span style="color: red;"></if>@tasks.end_date;noquote@<if @tasks.end_date_passed_p@></span></if>&nbsp;<a href="@tasks.task_plus_url@" style="text-decoration: none; font-weight: bold;">&raquo;</a>
+		  <if @tasks.due_date@>
+		<a href="@tasks.task_minus_url@" style="text-decoration: none; font-weight: bold;">&laquo;</a>&nbsp;<if @tasks.due_date_passed_p@><span style="color: red;"></if>@tasks.due_date;noquote@<if @tasks.due_date_passed_p@></span></if>&nbsp;<a href="@tasks.task_plus_url@" style="text-decoration: none; font-weight: bold;">&raquo;</a>
                   </if>
                 </else>
 	    }
@@ -128,73 +123,72 @@ template::list::create \
     -filters {
 	party_id {}
     } -orderby {
-        default_value $orderby
+        default_value "priority,desc"
         date {
             label "[_ tasks.Due]"
-            orderby_desc "CASE WHEN pt.status = 1 THEN ptr.end_date ELSE tasks__completion_date(ci.item_id) END desc, ptr.priority, upper(cr.title)"
-            orderby_asc "CASE WHEN pt.status = 1 THEN ptr.end_date ELSE tasks__completion_date(ci.item_id) END asc, ptr.priority, upper(cr.title)"
+            orderby_desc "CASE WHEN t.status_id = 1 THEN t.due_date ELSE t.completed_date END desc, t.priority, lower(t.title)"
+            orderby_asc "CASE WHEN t.status_id = 1 THEN t.due_date ELSE t.completed_date END asc, t.priority, lower(t.title)"
             default_direction desc
         }
         priority {
             label "[_ tasks.Priority]"
-            orderby_desc "pt.status, ptr.priority desc, CASE WHEN pt.status = 1 THEN ptr.end_date ELSE tasks__completion_date(ci.item_id) END desc, upper(cr.title)"
-            orderby_asc "pt.status, ptr.priority asc, CASE WHEN pt.status = 1 THEN ptr.end_date ELSE tasks__completion_date(ci.item_id) END asc, upper(cr.title)"
+            orderby_desc "t.status_id, t.priority desc, CASE WHEN t.status_id = 1 THEN t.due_date ELSE t.completed_date END desc, lower(t.title)"
+            orderby_asc "t.status_id, t.priority asc, CASE WHEN t.status_id = 1 THEN t.due_date ELSE t.completed_date END asc, lower(t.title)"
             default_direction desc
         }
         title {
             label "[_ tasks.Task]"
-            orderby_desc "upper(cr.title) desc, ptr.priority desc, ptr.end_date asc"
-            orderby_asc "upper(cr.title) asc, ptr.priority desc, ptr.end_date asc"
+            orderby_desc "lower(t.title) desc, t.priority desc, t.due_date asc"
+            orderby_asc "lower(t.title) asc, t.priority desc, t.due_date asc"
             default_direction asc
         }
-        process {
+        process_title {
 	    label "[_ tasks.Process]"
-            orderby_desc "upper(ppi.name) desc, ptr.priority desc, ptr.end_date asc"
-            orderby_asc "upper(ppi.name) asc, ptr.priority desc, ptr.end_date asc"
+            orderby_desc "lower(p.title) desc, t.priority desc, t.due_date asc"
+            orderby_asc "lower(p.title) asc, t.priority desc, t.due_date asc"
+	    default_direction asc
+	}
+	contact {
+	    label "[_ tasks.Contact]"
+            orderby_desc "lower(contact__name(t.object_id)) desc, t.due_date asc, t.priority, lower(t.title)"
+            orderby_asc "lower(contact__name(t.object_id)) asc, t.due_date asc, t.priority, lower(t.title)"
 	    default_direction asc
 	}
 	creation_user {
 	    label "[_ tasks.Created_By]"
-            orderby_desc "upper(contact__name(ao.creation_user)) desc, ptr.end_date asc, ptr.priority, upper(cr.title)"
-            orderby_asc "upper(contact__name(ao.creation_user)) asc, ptr.end_date asc, ptr.priority, upper(cr.title)"
+            orderby_desc "lower(contact__name(ao.creation_user)) desc, t.due_date asc, t.priority, lower(t.title)"
+            orderby_asc "lower(contact__name(ao.creation_user)) asc, t.due_date asc, t.priority, lower(t.title)"
 	    default_direction asc
 	}
     }
 
 
-
-set project_id [tasks::project_id]
-db_multirow -extend {creation_user_url complete_url done_p process_plus_url process_minus_url task_plus_url task_minus_url description_html task_url} -unclobber tasks get_tasks "
-    select pt.task_id,
-           tasks__relative_date(ptr.end_date) as  end_date,
-           tasks__relative_date(tasks__completion_date(ci.item_id)) as completed_date,
-           cr.title,
-           cr.description,
-           ptr.priority,
-           :party_id as party_id,
-           ppi.name as process,
-           ppi.process_id as process_id,
-           ao.creation_user,
+db_multirow -extend {creation_user_url contact_url complete_url done_p process_plus_url process_minus_url task_plus_url task_minus_url description_html task_url} -unclobber tasks get_tasks "
+    select t.task_id, t.title, t.description, t.mime_type, t.priority,
+           t.party_id, p.title as process_title, p.process_id,
+           tasks__relative_date(t.due_date) as due_date,
+           tasks__relative_date(t.completed_date) as completed_date,
+           ao.creation_user, t.status_id, t.process_instance_id,
            contact__name(ao.creation_user) as creation_name,
-           pt.status as status_id,
-           pt.process_instance,
-           CASE WHEN ptr.end_date < now() THEN 't' ELSE 'f' END as end_date_passed_p
-      from cr_items ci,
-           pm_tasks_revisions ptr,
-           pm_tasks pt left join pm_process_instance ppi on (pt.process_instance = ppi.instance_id ),
-           cr_revisions cr,
-           acs_objects ao
-     where ci.parent_id = :project_id
-       and ci.item_id = pt.task_id
-       and ci.latest_revision = ptr.task_revision_id
-       and ci.live_revision = ptr.task_revision_id
-       and ptr.task_revision_id = cr.revision_id
-       and cr.revision_id = ao.object_id
-       and pt.deleted_p = 'f'
-       and task_id in ( select task_id from pm_task_assignment where party_id = :party_id and role_id = '1' )
+           CASE WHEN t.due_date < now() THEN 't' ELSE 'f' END as due_date_passed_p,
+           s.title as status, t.object_id,
+           contact__name(t.object_id) as contact
+      from t_task_status s, acs_objects ao, t_tasks t
+      left outer join t_process_instances pi
+      on (pi.process_instance_id = t.process_instance_id)
+      left outer join t_processes p
+      on (p.process_id = pi.process_id)
+      where s.status_id = t.status_id
+      and ao.object_id = t.task_id
+      and ao.package_id = :package_id
+      and t.party_id = :party_id
+      and t.start_date < now()
      [template::list::orderby_clause -orderby -name tasks]
 " {
     set creation_user_url [contact::url -party_id $creation_user]
+    if {![empty_string_p $object_id]} {
+	set contact_url [contact::url -party_id $object_id]
+    }
     regsub -all "/tasks/" $creation_user_url "/contacts/" creation_user_url
     set complete_url [export_vars -base "mark-completed" -url {task_id orderby party_id return_url}]
     if { $status_id == "2" } {
@@ -202,7 +196,7 @@ db_multirow -extend {creation_user_url complete_url done_p process_plus_url proc
     } else {
 	set done_p 0
     }
-    set task_url [export_vars -base task -url {party_id orderby status task_id}]
+    set task_url [export_vars -base task -url {party_id orderby status_id task_id}]
     set task_plus_url  [export_vars -base task-interval -url {{action plus}  {days 7} party_id task_id status_id orderby return_url}]
     set task_minus_url [export_vars -base task-interval -url {{action minus} {days 7} party_id task_id status_id orderby return_url}]
     set process_plus_url  [export_vars -base process-interval -url {{action plus}  {days 7} party_id process_instance status_id orderby return_url}]
@@ -211,7 +205,7 @@ db_multirow -extend {creation_user_url complete_url done_p process_plus_url proc
     regsub -all "\r|\n" $description {LiNeBrEaK} description
 
     set description_html [ad_html_text_convert \
-			      -from "text/plain" \
+			      -from $mime_type \
 			      -to "text/html" \
 			      -truncate_len "400" \
 			      -more "<a href=\"${task_url}\">[_ tasks.more]</a>" \
@@ -222,7 +216,7 @@ db_multirow -extend {creation_user_url complete_url done_p process_plus_url proc
 # 167 is the actual paragraph standard internationally but 182 is more common in the US
     regsub -all {LiNeBrEaK} $description_html {\&nbsp;\&nbsp;\&#182;\&nbsp;} description_html
 
-    regsub -all " " $end_date {\&nbsp;} end_date
+    regsub -all " " $due_date {\&nbsp;} due_date
     regsub -all " " $completed_date {\&nbsp;} completed_date
 }
 

@@ -42,12 +42,11 @@ foreach party $all_parties {
 set names [join $names ", "]
 
 if { ![exists_and_not_null return_url] } {
-    set return_url [export_vars -base "contact" -url {party_id orderby status_id}]
+    set return_url [export_vars -base "contact" -url {party_id status_id orderby}]
 }
 
 set package_id [ad_conn package_id]
 set user_id    [ad_maybe_redirect_for_registration]
-set project_id [tasks::project_id]
 
 set title "[_ tasks.AddEdit]"
 set context [list $title]
@@ -66,10 +65,27 @@ if { ![ad_form_new_p -key task_id] } {
 }
 
 if { [ns_queryget "formbutton:delete"] != "" } {
-    ad_returnredirect [export_vars -base "delete" -url {task_id status_id orderby return_url}]
+    ad_returnredirect [export_vars -base "delete" -url {task_id orderby status_id return_url}]
     ad_script_abort
 }
 
+set contact_options [db_list_of_lists contact_options {
+    select CASE WHEN o.name is null THEN p.first_names || ' ' || p.last_name ELSE o.name END as name, y.party_id
+    from parties y
+    left join persons p on (y.party_id = p.person_id)
+    left join organizations o on (y.party_id = o.organization_id)
+    where (p.person_id is not null or o.organization_id is not null)
+    and y.party_id > 0
+    order by 1
+}]
+set contact_options [concat [list [list "" ""]] $contact_options]
+
+set status_options [db_list_of_lists status_options {
+    select title, status_id
+    from t_task_status
+    order by status_id
+}]
+set status_options [lang::util::localize $status_options]
 
 ad_form -name add_edit \
     -cancel_url $return_url \
@@ -78,8 +94,8 @@ ad_form -name add_edit \
     -form {
         task_id:key
         return_url:text(hidden),optional
-        status_id:integer(hidden),optional
         orderby:text(hidden),optional
+        status_id:integer(hidden),optional
         party_id:integer(hidden)
         other_party_ids:text(hidden),optional
         {names:text(hidden),optional {label {Add Task To}}}
@@ -103,35 +119,25 @@ ad_form -name add_edit \
 
         {task:text(text),optional
             {label "[_ tasks.Custom_Task]"}
-            {html { maxlength 1000 size 35 }}
+            {html { maxlength 1000 size 80 }}
             {help_text {You can either use a standard task or a custom task, but not both}}
 	}
 
-	{end_date:text(text)
+        {object_id:text(select),optional
+            {label "[_ tasks.Contact]"}
+            {options $contact_options}
+        }
+
+	{due_date:text
 	    {label "[_ tasks.Due]"}
 	    {html {id date1 size 10 maxlength 10}}
 	    {help_text {if blank there is no due date}}
-	    {after_html {
-		<button type=\"reset\" id=\"f_date_b1\">YYYY-MM-DD</button>
-<script type=\"text/javascript\">
-    Calendar.setup({
-        inputField     :    \"date1\",       // id of the input field, put readonly 1 in html to limit input 
-        ifFormat       :    \"%Y-%m-%d\",   // Format the input field
-        daFormat       :    \"%m %d %Y\",   // Format for the display area
-        showsTime      :    false,          // will display a time selector
-        button         :    \"f_date_b1\",   // trigger for the calendar (button ID)
-        singleClick    :    true,           // double-click mode
-        step           :    1,              // show all years in drop-down boxes (instead of every other year as default)
-        weekNumbers    :    false,          // do not show the week numbers
-        showOthers     :    false           // show days belonging to other months
-    });
-</script>
-	    }}
+	    {after_html {<input type='reset' value=' ... ' onclick=\"return showCalendar('date1', 'y-m-d');\"> \[<b>y-m-d </b>\]}}
 	}
 
-        {completed_p:text(checkbox),optional
+        {status:text(select)
             {label "[_ tasks.Status]"}
-            {options {{Completed 1}}}
+            {options $status_options}
         }
 
         {priority:integer(select),optional
@@ -143,35 +149,27 @@ ad_form -name add_edit \
             {label "[_ tasks.Notes]"}
             {html { rows 6 cols 60 wrap soft}}}
 
+        {comment:text(textarea),optional,nospell
+            {label "[_ tasks.Comment]"}
+            {html { rows 6 cols 60 wrap soft}}}
+
     } -new_request {
 
         set title "[_ tasks.Add_Task]"
 	set context [list $title]
-	set status_id "1"
+	set status "1"
         set priority "1"
 
     } -edit_request {
 
 	db_1row get_task_info {
-	    select ci.item_id as task_id,
-                   cr.title as task,
-                   to_char(ptr.end_date,'YYYY-MM-DD') as end_date,
-                   ptr.percent_complete,
-                   ptr.priority,
-                   cr.description
-              from pm_tasks_revisions ptr,
-                   cr_revisions cr,
-                   cr_items ci
-             where ci.item_id = :task_id
-               and ci.latest_revision = ptr.task_revision_id
-               and ci.live_revision = ptr.task_revision_id
-               and ptr.task_revision_id = cr.revision_id
-            
+	    select t.title as task, t.description, t.comment,
+                   to_char(t.due_date,'YYYY-MM-DD') as due_date,
+                   t.priority, t.status_id as status, t.object_id
+              from t_tasks t
+             where t.task_id = :task_id
 	}
-	if { $percent_complete >= "100" } {
-	    set completed_p "1"
-	}
-        set title ${task}
+	set title $task
 	set context [list $title]
 	set task_prescribed_p 0
 	foreach task_prescribed_option [template::element::get_property add_edit task_prescribed options] {
@@ -184,7 +182,6 @@ ad_form -name add_edit \
 	    set task ""
 	} else {
 	    set task_prescribed ""
-	    set task $task
 	}
     } -validate {
 #	{end_date {[calendar::date_valid_p -date $end_date]} {This is not a valid date. Either the date doesn't exist or it is not formatted correctly. Correct formatting is: YYYY-MM-DD or YYYYMMDD}}
@@ -204,30 +201,21 @@ ad_form -name add_edit \
 	    break
 	}
 
-        set user_id [ad_conn user_id]
-        set peeraddr [ad_conn peeraddr]
-        if { $completed_p == "1" } {
-	    set percent_complete "100"
-	} else {
-	    set percent_complete "0"
-	}
     } -new_data {
 
 	foreach party $all_parties {
 
-	    set task_id [pm::task::new -project_id ${project_id} \
+	    set task_id [tasks::task::new \
 			     -title ${task} \
 			     -description ${description} \
 			     -mime_type "text/plain" \
-			     -end_date ${end_date} \
-			     -percent_complete ${percent_complete} \
-			     -creation_user ${user_id} \
-			     -creation_ip ${peeraddr} \
+			     -comment ${comment} \
+			     -party_id ${party} \
+			     -object_id $object_id \
+			     -due_date ${due_date} \
+			     -status_id ${status} \
 			     -package_id ${package_id} \
 			     -priority ${priority}]
-
-	    pm::task::assign -task_item_id $task_id -party_id $party
-
 	}
 
 	if { [llength $all_parties] == 1 } {
@@ -239,42 +227,16 @@ ad_form -name add_edit \
 
     } -edit_data {
 
-	if {$percent_complete >= 100} {
-	    set task_status_id [pm::task::default_status_closed]
-	} elseif {$percent_complete < 100} {
-	    set task_status_id [pm::task::default_status_open]
-	}
-	set task_item_id $task_id
-	set project_item_id $project_id
-	set title $task
-	set mime_type "text/plain"
-	set estimated_hours_work ""
-	set estimated_hours_work_min ""
-	set estimated_hours_work_max ""
-	set actual_hours_worked ""
-	set update_user $user_id
-	set update_ip $peeraddr
-
-	db_exec_plsql new_task_revision "
-	    select pm_task__new_task_revision (
-					       :task_item_id,
-					       :project_item_id,
-					       :title,
-					       :description,
-					       :mime_type,
-					       [pm::util::datenvl -value $end_date -value_if_null "null" -value_if_not_null ":end_date"],
-					       :percent_complete,
-					       :estimated_hours_work,
-					       :estimated_hours_work_min,
-					       :estimated_hours_work_max,
-					       :actual_hours_worked,
-					       :task_status_id,
-					       current_timestamp,
-					       :update_user,
-					       :update_ip, 
-					       :package_id,
-					       :priority)
-	"
+	set task_id [tasks::task::edit \
+			 -task_id ${task_id} \
+			 -title ${task} \
+			 -description ${description} \
+			 -mime_type "text/plain" \
+			 -comment ${comment} \
+			 -object_id $object_id \
+			 -due_date ${due_date} \
+			 -status_id ${status} \
+			 -priority ${priority}]
 
     	set task_url [export_vars -base task -url {task_id status_id orderby party_id}]
 	util_user_message -html -message "[_ tasks.lt_The_task_a_hreftaskst_1]"
@@ -294,6 +256,8 @@ ad_form -name add_edit \
 
 if { ![ad_form_new_p -key task_id] } {
     set creation_id [db_string get_it { select creation_user from acs_objects where object_id = :task_id }]
+    set creator_url [contact::url -party_id $creation_id]
+    set creator_name [contact::name -party_id $creation_id]
     template::element::create add_edit creator \
 	-datatype "text" \
 	-widget "inform" \

@@ -5,7 +5,7 @@ ad_page_contract {
     @creation-date 2004-07-28
     @cvs-id $Id$
 } {
-    {orderby "end_date,asc"}
+    {orderby "due_date,asc"}
     {format "normal"}
     {search_id:integer ""}
     {query ""}
@@ -16,12 +16,14 @@ ad_page_contract {
 }
 
 
-set title "Tasks"
+set title "[_ tasks.Tasks]"
 set context {}
 set project_id [tasks::project_id]
 set user_id [ad_conn user_id]
+set package_id [ad_conn package_id]
+set url [ad_conn url]
 
-set return_url [export_vars -base "/tasks/" -url {orderby format search_id query page page_size tasks_interval {page_flush_p t}}]
+set return_url [export_vars -base $url -url {orderby format search_id query page page_size tasks_interval {page_flush_p t}}]
 
 
 if { $orderby == "contact_name,asc" } {
@@ -31,8 +33,6 @@ if { $orderby == "contact_name,asc" } {
 } else {
     set name_order 0
 }
-
-
 
 
 set first_p 1
@@ -48,8 +48,7 @@ foreach page_s [list 25 50 100 500] {
     set first_p 0
 }
 
-set admin_p [permission::permission_p -object_id [ad_conn package_id] -privilege admin]
-set task_term [ad_conn instance_name]
+set admin_p [permission::permission_p -object_id $package_id -privilege admin]
 set context {}
 
 template::list::create \
@@ -61,41 +60,41 @@ template::list::create \
     -page_query_name tasks_pagination \
     -elements {
         priority {
-	    label "Priority"
+	    label "[_ tasks.Priority]"
 	}
         contact_name {
-	    label "Contact"
+	    label "[_ tasks.Contact]"
 	    link_url_eval $contact_url
 	} 
 	title {
-	    label "Task"
+	    label "[_ tasks.Task]"
             display_template {
-		<a href="/tasks/task?party_id=@tasks.party_id@&task_id=@tasks.task_id@&orderby=${orderby}" title="@tasks.title@">@tasks.title@</a>
+		<a href="${url}task?party_id=@tasks.party_id@&task_id=@tasks.task_id@&orderby=${orderby}" title="@tasks.title@">@tasks.title@</a>
 	    }
 	}
-        process {
-	    label "Process"
+        process_title {
+	    label "[_ tasks.Process]"
 	}
-        end_date {
-	    label "Due"
+        due_date {
+	    label "[_ tasks.Due]"
             display_template {
 		<if @tasks.overdue_p@>
-		<span class="overdue">@tasks.end_date@</span>
+		<span class="overdue">@tasks.due_date@</span>
 		</if>
 		<else>
-		@tasks.end_date@
+		@tasks.due_date@
 		</else>
 	    }
 	}
     } \
     -bulk_actions [list \
-		       "Mark Completed" "mark-completed" "Mark Completed" \
-		       "Delete" "delete" "Delete" \
+		       "[_ tasks.Mark_Completed]" "mark-completed" "[_ tasks.Mark_Completed]" \
+		       "[_ tasks.Delete]" "delete" "[_ tasks.Delete]" \
 		       "[_ contacts.Mail_Merge]" "mail-merge" "[_ contacts.lt_E-mail_or_Mail_the_se]" \
 		      ]\
     -bulk_action_export_vars {
         {return_url}
-    } \
+    } -pass_properties { } \
     -sub_class {
         narrow
     } \
@@ -108,34 +107,34 @@ template::list::create \
     } \
     -orderby {
         default_value $orderby
-        end_date {
+        due_date {
             label "Due"
-            orderby_desc "ptr.end_date desc, ptr.priority, upper(cr.title)"
-            orderby_asc "ptr.end_date asc, ptr.priority, upper(cr.title)"
+            orderby_desc "t.due_date desc, t.priority, lower(t.title)"
+            orderby_asc "t.due_date asc, t.priority, lower(t.title)"
             default_direction asc
         }
         priority {
             label "Priority"
-            orderby_desc "ptr.priority desc, ptr.end_date asc, upper(cr.title)"
-            orderby_asc "ptr.priority asc, ptr.end_date asc, upper(cr.title)"
+            orderby_desc "t.priority desc, t.due_date asc, lower(t.title)"
+            orderby_asc "t.priority asc, t.due_date asc, lower(t.title)"
             default_direction desc
         }
         title {
             label "Task"
-            orderby_desc "upper(cr.title) desc, ptr.priority desc, ptr.end_date asc"
-            orderby_asc "upper(cr.title) asc, ptr.priority desc, ptr.end_date asc"
+            orderby_desc "lower(t.title) desc, t.priority desc, t.due_date asc"
+            orderby_asc "lower(t.title) asc, t.priority desc, t.due_date asc"
             default_direction asc
         }
 	contact_name {
 	    label "Contact"
-	    orderby_asc "lower(contact__name(assigned_tasks.party_id,'1'::boolean)) asc"
-	    orderby_desc "lower(contact__name(assigned_tasks.party_id,'0'::boolean)) asc"
+	    orderby_asc "lower(contact__name(t.party_id,'1'::boolean)) asc"
+	    orderby_desc "lower(contact__name(t.party_id,'0'::boolean)) asc"
 	    default_direction asc
 	}
-        process {
+        process_title {
 	    label "Process"
-            orderby_desc "upper(ppi.name) desc, ptr.priority desc, ptr.end_date asc"
-            orderby_asc "upper(ppi.name) asc, ptr.priority desc, ptr.end_date asc"
+            orderby_desc "lower(p.title) desc, t.priority desc, t.due_date asc"
+            orderby_asc "lower(p.title) asc, t.priority desc, t.due_date asc"
 	    default_direction asc
 	}
     }
@@ -148,7 +147,6 @@ db_multirow -extend { contact_url } -unclobber tasks tasks_select {} {
 set tasks_count [db_string tasks_count {} -default {0}]
 
 
-set package_id "11426862"
 if { [exists_and_not_null search_id] } {
     contact::search::log -search_id $search_id
 }
@@ -164,7 +162,7 @@ set form_elements {
     {search_id:integer(select),optional {label ""} {options $search_options} {html {onChange "javascript:acs_FormRefresh('search')"}}}
     {query:text(text),optional {label ""} {html {size 20 maxlength 255}}}
     {save:text(submit) {label {[_ contacts.Search]}} {value "go"}}
-    {tasks_interval:integer(text),optional {label "&nbsp;&nbsp;<span style=\"font-size: smaller;\">View next</span>"} {after_html "<span style=\"font-size: smaller;\">days &nbsp;&nbsp;&nbsp;Results:</span>&nbsp;$tasks_count"} {html {size 2 maxlength 3 onChange "javascript:acs_FormRefresh('search')"}}}
+    {tasks_interval:integer(text),optional {label "&nbsp;&nbsp;<span style=\"font-size: smaller;\">[_ tasks.View_next]</span>"} {after_html "<span style=\"font-size: smaller;\">days &nbsp;&nbsp;&nbsp;Results:</span>&nbsp;$tasks_count"} {html {size 2 maxlength 3 onChange "javascript:acs_FormRefresh('search')"}}}
 }
 
 if { [parameter::get -boolean -parameter "ForceSearchBeforeAdd" -default "0"] } {
