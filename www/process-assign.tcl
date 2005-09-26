@@ -39,15 +39,16 @@ db_transaction {
 
     set case_id [db_nextval acs_object_id_seq]
 
-    tasks::process::instance::new \
-	-process_id $process_id \
-	-case_id $case_id \
-	-object_id $object_id
+    set instance_id [tasks::process::instance::new \
+			 -process_id $process_id \
+			 -case_id $case_id \
+			 -party_id $assignee_id \
+			 -object_id $object_id]
 
     workflow::case::new -no_notification \
 	-case_id $case_id \
 	-workflow_id $workflow_id \
-	-object_id $object_id
+	-object_id $instance_id
 }
 
 ad_returnredirect [export_vars -base "contact" -url {{party_id $assignee_id}}]

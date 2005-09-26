@@ -1,5 +1,5 @@
 set user_id [ad_conn user_id]
-set party_id $user_id
+set party_id $contact_id
 set tasks_url "/tasks/"
 
 if { ![contact::exists_p -party_id $contact_id] } {
@@ -14,7 +14,7 @@ if { ![exists_and_not_null status_id] } {
 set done_url [export_vars -url -base "${tasks_url}contact" {orderby {status_id 2} party_id}]
 set not_done_url [export_vars -url -base "${tasks_url}contact" {orderby {status_id 1} party_id}]
 set return_url "[ad_conn url]?[ad_conn query]"
-set add_url [export_vars -base "${tasks_url}task" {return_url orderby status_id {object_id $contact_id} party_id}]
+set add_url [export_vars -base "${tasks_url}task" {return_url orderby status_id party_id}]
 
 set package_id [apm_package_id_from_key tasks]
 
@@ -58,12 +58,6 @@ template::list::create \
 		</else>
 	    }
 	}
-        contact {
-	    label "[_ tasks.Contact]"
-	    display_template {
-		<if @tasks.object_id@ not nil><a href="@tasks.contact_url@">@tasks.contact@</a></if>
-	    }
-	}
         date {
 	    label "[_ tasks.Date]"
 	    display_template {
@@ -86,7 +80,7 @@ template::list::create \
         narrow
     } \
     -filters {
-	contact_id {}
+	party_id {}
     } -orderby {
         default_value "priority,desc"
         date {
@@ -113,12 +107,6 @@ template::list::create \
             orderby_asc "lower(p.title) asc, t.priority desc, t.due_date asc"
 	    default_direction asc
 	}
-	contact {
-	    label "[_ tasks.Contact]"
-            orderby_desc "lower(contact__name(t.object_id)) desc, t.due_date asc, t.priority, lower(t.title)"
-            orderby_asc "lower(contact__name(t.object_id)) asc, t.due_date asc, t.priority, lower(t.title)"
-	    default_direction asc
-	}
 	creation_user {
 	    label "[_ tasks.Created_By]"
             orderby_desc "lower(contact__name(ao.creation_user)) desc, t.due_date asc, t.priority, lower(t.title)"
@@ -136,8 +124,7 @@ db_multirow -extend {creation_user_url contact_url complete_url done_p task_plus
            ao.creation_user, t.status_id, t.process_instance_id,
            contact__name(ao.creation_user) as creation_name,
            CASE WHEN t.due_date < now() THEN 't' ELSE 'f' END as due_date_passed_p,
-           s.title as status, t.object_id,
-           contact__name(t.object_id) as contact
+           s.title as status, t.object_id
       from t_task_status s, acs_objects ao, t_tasks t
       left outer join t_process_instances pi
       on (pi.process_instance_id = t.process_instance_id)
@@ -146,24 +133,21 @@ db_multirow -extend {creation_user_url contact_url complete_url done_p task_plus
       where s.status_id = t.status_id
       and ao.object_id = t.task_id
       and ao.package_id = :package_id
-      and t.object_id = :contact_id
+      and t.party_id = :contact_id
       and t.start_date < now()
      [template::list::orderby_clause -orderby -name tasks]
 " {
     set creation_user_url [contact::url -party_id $creation_user]
-    if {![empty_string_p $object_id]} {
-	set contact_url [contact::url -party_id $object_id]
-    }
     regsub -all "/tasks/" $creation_user_url "/contacts/" creation_user_url
-    set complete_url [export_vars -base "${tasks_url}mark-completed" -url {task_id orderby party_id return_url}]
+    set complete_url [export_vars -base "${tasks_url}mark-completed" -url {task_id orderby {party_id $contact_id} return_url}]
     if { $status_id == "2" } {
 	set done_p 1
     } else {
 	set done_p 0
     }
-    set task_url [export_vars -base "${tasks_url}task" -url {party_id orderby status_id task_id}]
-    set task_plus_url  [export_vars -base "${tasks_url}task-interval" -url {{action plus}  {days 7} party_id task_id status_id orderby return_url}]
-    set task_minus_url [export_vars -base "${tasks_url}task-interval" -url {{action minus} {days 7} party_id task_id status_id orderby return_url}]
+    set task_url [export_vars -base "${tasks_url}task" -url {{party_id $contact_id} orderby status_id task_id}]
+    set task_plus_url  [export_vars -base "${tasks_url}task-interval" -url {{action plus}  {days 7} {party_id $contact_id} task_id status_id orderby return_url}]
+    set task_minus_url [export_vars -base "${tasks_url}task-interval" -url {{action minus} {days 7} {party_id $contact_id} task_id status_id orderby return_url}]
 
     regsub -all "\r|\n" $description {LiNeBrEaK} description
 

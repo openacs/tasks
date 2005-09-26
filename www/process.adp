@@ -1,4 +1,5 @@
-<master src="/packages/contacts/custom/mbbs-contacts-master" />
+<master src="/packages/contacts/custom/mbbs-contact-master">
+<property name="party_id">@assignee_id@</property>
 <property name="title">@title@</property>
 <property name="context">@context@</property>
 

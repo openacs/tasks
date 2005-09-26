@@ -72,8 +72,10 @@ ad_proc -public tasks::workflow::impl::action_side_effect::do {
 } {
     create new tasks linked to this action
 } {
+    ns_log notice "\#\#\# entering tasks-action-callback: $case_id, $object_id, $action_id"
+
     db_1row process_id {
-	select process_instance_id, process_id, party_id
+	select process_instance_id, process_id, party_id, object_id
 	from t_process_instances
 	where case_id = :case_id
     }

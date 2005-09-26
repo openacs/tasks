@@ -18,7 +18,6 @@ ad_page_contract {
 
 set title "[_ tasks.Tasks]"
 set context {}
-set project_id [tasks::project_id]
 set user_id [ad_conn user_id]
 set package_id [ad_conn package_id]
 set url [ad_conn url]
@@ -69,7 +68,12 @@ template::list::create \
 	title {
 	    label "[_ tasks.Task]"
             display_template {
-		<a href="${url}task?party_id=@tasks.party_id@&task_id=@tasks.task_id@&orderby=${orderby}" title="@tasks.title@">@tasks.title@</a>
+		<a href="@tasks.task_url@" title="@tasks.title@">@tasks.title@</a>
+		<if @tasks.description@ not nil>
+                <p style="padding: 0; margin: 0; font-size: 0.85em; padding-left: 2em;">
+		@tasks.description_html;noquote@
+		</p>
+		</if>
 	    }
 	}
         process_title {
@@ -78,12 +82,9 @@ template::list::create \
         due_date {
 	    label "[_ tasks.Due]"
             display_template {
-		<if @tasks.overdue_p@>
-		<span class="overdue">@tasks.due_date@</span>
-		</if>
-		<else>
-		@tasks.due_date@
-		</else>
+		<if @tasks.overdue_p@><span class="overdue"></if>
+		<a href="@tasks.task_minus_url@" style="text-decoration: none; font-weight: bold;">&laquo;</a>&nbsp;@tasks.due_date;noquote@&nbsp;<a href="@tasks.task_plus_url@" style="text-decoration: none; font-weight: bold;">&raquo;</a>
+		<if @tasks.overdue_p@></span></if>
 	    }
 	}
     } \
@@ -139,8 +140,22 @@ template::list::create \
 	}
     }
 
-db_multirow -extend { contact_url } -unclobber tasks tasks_select {} {
+db_multirow -extend { contact_url description_html task_url task_plus_url task_minus_url } -unclobber tasks tasks_select {} {
     set contact_url "/contacts/${party_id}/"
+    set task_url [export_vars -base "task" -url {orderby status_id task_id}]
+    set task_plus_url  [export_vars -base "task-interval" -url {{action plus}  {days 7} task_id status_id orderby return_url}]
+    set task_minus_url [export_vars -base "task-interval" -url {{action minus} {days 7} task_id status_id orderby return_url}]
+
+    regsub -all "\r|\n" $description {LiNeBrEaK} description
+    set description_html [ad_html_text_convert \
+			      -from $mime_type \
+			      -to "text/html" \
+			      -truncate_len "400" \
+			      -more "<a href=\"${task_url}\">[_ tasks.more]</a>" \
+			      -- $description]
+    regsub -all {LiNeBrEaKLiNeBrEaK} $description_html {LiNeBrEaK} description_html
+    regsub -all {LiNeBrEaK} $description_html {\&nbsp;\&nbsp;\&#182;\&nbsp;} description_html
+    regsub -all " " $due_date {\&nbsp;} due_date
 }
 
 

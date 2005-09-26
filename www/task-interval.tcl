@@ -10,7 +10,7 @@ ad_page_contract {
     @return title Page title.
 
 } {
-    {party_id:integer,notnull}
+    {party_id:integer,optional}
     task_id:integer
     status_id:integer,optional
     orderby:optional
@@ -56,7 +56,7 @@ set task_id [tasks::task::edit \
 		 -status_id ${status} \
 		 -priority ${priority}]
 
-set task_url [export_vars -base "/tasks/task" -url {task_id status_id orderby}]
+set task_url [export_vars -base "/tasks/task" -url {task_id party_id status_id orderby}]
 
 if { $action == "minus" } {
     util_user_message -html -message "[_ tasks.task_moved_up]"

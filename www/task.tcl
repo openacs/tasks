@@ -69,17 +69,6 @@ if { [ns_queryget "formbutton:delete"] != "" } {
     ad_script_abort
 }
 
-set contact_options [db_list_of_lists contact_options {
-    select CASE WHEN o.name is null THEN p.first_names || ' ' || p.last_name ELSE o.name END as name, y.party_id
-    from parties y
-    left join persons p on (y.party_id = p.person_id)
-    left join organizations o on (y.party_id = o.organization_id)
-    where (p.person_id is not null or o.organization_id is not null)
-    and y.party_id > 0
-    order by 1
-}]
-set contact_options [concat [list [list "" ""]] $contact_options]
-
 set status_options [db_list_of_lists status_options {
     select title, status_id
     from t_task_status
@@ -122,11 +111,6 @@ ad_form -name add_edit \
             {html { maxlength 1000 size 80 }}
             {help_text {You can either use a standard task or a custom task, but not both}}
 	}
-
-        {object_id:text(select),optional
-            {label "[_ tasks.Contact]"}
-            {options $contact_options}
-        }
 
 	{due_date:text
 	    {label "[_ tasks.Due]"}
@@ -211,7 +195,6 @@ ad_form -name add_edit \
 			     -mime_type "text/plain" \
 			     -comment ${comment} \
 			     -party_id ${party} \
-			     -object_id $object_id \
 			     -due_date ${due_date} \
 			     -status_id ${status} \
 			     -package_id ${package_id} \
@@ -233,7 +216,6 @@ ad_form -name add_edit \
 			 -description ${description} \
 			 -mime_type "text/plain" \
 			 -comment ${comment} \
-			 -object_id $object_id \
 			 -due_date ${due_date} \
 			 -status_id ${status} \
 			 -priority ${priority}]
