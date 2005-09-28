@@ -2,6 +2,6 @@
 
 <p><formtemplate id="search" style="proper-inline"></formtemplate></p>
 
-<listtemplate name="tasks"></listtemplate>
+<include src="../lib/tasks" contact_id=@user_id@>
         
 
