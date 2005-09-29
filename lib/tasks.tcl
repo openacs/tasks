@@ -1,12 +1,13 @@
-set user_id [ad_conn user_id]
 set tasks_url "/tasks/"
 
-if { ![info exist contact_id] } {
-    set contact_id $party_id
-}
-
-if { ![contact::exists_p -party_id $contact_id] } {
+# If we are not viewing the tasks of a party, view the tasks of the user
+if {![exists_and_not_null party_id]} {
+    set user_id [ad_conn user_id]
     set contact_id $user_id
+    set user_id2 $user_id
+} else {
+    set contact_id $party_id 
+    set user_id2 ""
 }
 
 if { ![exists_and_not_null orderby] } {
@@ -84,7 +85,12 @@ template::list::create \
         narrow
     } \
     -filters {
-	party_id {}
+	party_id {
+	    where_clause {t.party_id = :party_id}
+	}
+	user_id {
+	    where_clause {ao.creation_user = :user_id}
+	}
     } -orderby {
         default_value "priority,desc"
         date {
@@ -118,7 +124,6 @@ template::list::create \
 	    default_direction asc
 	}
     }
-
 
 db_multirow -extend {creation_user_url contact_url complete_url done_p task_plus_url task_minus_url description_html task_url} -unclobber tasks get_tasks " " {
     set creation_user_url [contact::url -party_id $creation_user]

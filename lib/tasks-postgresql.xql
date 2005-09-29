@@ -33,9 +33,8 @@
       	where 
 		s.status_id = t.status_id
       		and ao.object_id = t.task_id
-      		and ao.creation_user = :contact_id
-      		and t.party_id = :contact_id
       		and t.start_date < now()
+		[template::list::filter_where_clauses -and -name tasks]
      		[template::list::orderby_clause -orderby -name tasks]
     </querytext>
 </fullquery>
