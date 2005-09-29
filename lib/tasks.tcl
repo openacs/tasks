@@ -2,9 +2,16 @@ set tasks_url "/tasks/"
 
 # If we are not viewing the tasks of a party, view the tasks of the user
 if {![exists_and_not_null party_id]} {
+
+    # the user_id is used for the filter. user_id2 for comparison
     set user_id [ad_conn user_id]
     set contact_id $user_id
     set user_id2 $user_id
+    
+    # We don't know if the party has been provided, so we first set it to empty
+    # so we can unset it later :).
+    set party_id ""
+    unset party_id
 } else {
     set contact_id $party_id 
     set user_id2 ""
