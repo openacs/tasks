@@ -1,4 +1,4 @@
-<master src="/packages/contacts/custom/mbbs-contacts-master" />
+<master src="/packages/contacts/lib/contacts-master" />
 
 <p><formtemplate id="search" style="proper-inline"></formtemplate></p>
 
