@@ -1,6 +1,6 @@
 ad_page_contract {
 
-    Simple add/edit form for projects
+    Simple add/edit form for tasks
 
     @author jader@bread.com, ncarroll@ee.usyd.edu.au
     @creation-date 2003-05-15
@@ -16,6 +16,7 @@ ad_page_contract {
     status_id:integer,optional
     orderby:optional
     {return_url ""}
+    {assign_party_id ""}
 } -properties {
 }
 
@@ -34,7 +35,24 @@ if { [llength $party_id] > 1 } {
     }
     set party_id $real_party_id
 }
-set all_parties [concat $party_id $other_party_ids]
+
+set user_id [ad_maybe_redirect_for_registration]
+
+# We select the users to use in the assign_party_id element
+# on the form to let the user choose who will be assigned to
+# the task, plus one blank space that willl be the current party_id
+set assign_parties_options [list [list "       " $party_id]]
+append assign_parties_options " [db_list_of_lists get_all_users { }]"
+
+# If the assign_party_id is present then we are going to assign
+# the task to that party_id
+
+if { [exists_and_not_null assign_party_id] } {
+    set all_parties [concat $assign_party_id $other_party_ids]
+} else {
+    set all_parties [concat $party_id $other_party_ids]
+}
+
 set names [list]
 foreach party $all_parties {
     lappend names [contact::link -party_id $party]
@@ -46,7 +64,6 @@ if { ![exists_and_not_null return_url] } {
 }
 
 set package_id [ad_conn package_id]
-set user_id    [ad_maybe_redirect_for_registration]
 
 set title "[_ tasks.AddEdit]"
 set context [list $title]
@@ -69,11 +86,7 @@ if { [ns_queryget "formbutton:delete"] != "" } {
     ad_script_abort
 }
 
-set status_options [db_list_of_lists status_options {
-    select title, status_id
-    from t_task_status
-    order by status_id
-}]
+set status_options [db_list_of_lists status_options { }]
 set status_options [lang::util::localize $status_options]
 
 ad_form -name add_edit \
@@ -87,8 +100,12 @@ ad_form -name add_edit \
         status_id:integer(hidden),optional
         party_id:integer(hidden)
         other_party_ids:text(hidden),optional
-        {names:text(hidden),optional {label {Add Task To}}}
-
+	{names:text(hidden),optional {label "[_ tasks.Add_task_to]"}}
+        {assign_party_id:text(select),optional 
+	    {label "[_ tasks.Add_task_to]"}
+	    {options { $assign_parties_options}}
+	    {help_text "[_ tasks.Select_the_user_to]"}
+	}
         {task_prescribed:text(select),optional
             {label "[_ tasks.Standard_Task]"}
 	    {options {
@@ -109,13 +126,13 @@ ad_form -name add_edit \
         {task:text(text),optional
             {label "[_ tasks.Custom_Task]"}
             {html { maxlength 1000 size 80 }}
-            {help_text {You can either use a standard task or a custom task, but not both}}
+            {help_text "[_ tasks.You_can_either_use]"}
 	}
 
 	{due_date:text
 	    {label "[_ tasks.Due]"}
 	    {html {id date1 size 10 maxlength 10}}
-	    {help_text {if blank there is no due date}}
+	    {help_text "[_ tasks.if_blank_there_is_no]"}
 	    {after_html {<input type='reset' value=' ... ' onclick=\"return showCalendar('date1', 'y-m-d');\"> \[<b>y-m-d </b>\]}}
 	}
 
@@ -126,7 +143,7 @@ ad_form -name add_edit \
 
         {priority:integer(select),optional
             {label "[_ tasks.Priority]"}
-            {options {{{3 - Very Important} 3} {{2 - Important} 2} {{1 - Normal} 1} {{0 - Not Important} 0}}}
+            {options {{{3 - [_ tasks.Very_Important]} 3} {{2 - [_ tasks.Important]} 2} {{1 - [_ tasks.Normal]} 1} {{0 - [_ tasks.Not_Important]} 0}}}
         }
 
         {description:text(textarea),optional,nospell
@@ -146,13 +163,7 @@ ad_form -name add_edit \
 
     } -edit_request {
 
-	db_1row get_task_info {
-	    select t.title as task, t.description, t.comment,
-                   to_char(t.due_date,'YYYY-MM-DD') as due_date,
-                   t.priority, t.status_id as status, t.object_id
-              from t_tasks t
-             where t.task_id = :task_id
-	}
+	db_1row get_task_info {	}
 	set title $task
 	set context [list $title]
 	set task_prescribed_p 0
@@ -170,6 +181,7 @@ ad_form -name add_edit \
     } -validate {
 #	{end_date {[calendar::date_valid_p -date $end_date]} {This is not a valid date. Either the date doesn't exist or it is not formatted correctly. Correct formatting is: YYYY-MM-DD or YYYYMMDD}}
     } -on_submit {
+
 	set task_prescribed [string trim $task_prescribed]
 	set task [string trim $task]
 	if { [exists_and_not_null task_prescribed] && [exists_and_not_null task] } {
@@ -237,7 +249,7 @@ ad_form -name add_edit \
     }
 
 if { ![ad_form_new_p -key task_id] } {
-    set creation_id [db_string get_it { select creation_user from acs_objects where object_id = :task_id }]
+    set creation_id [db_string get_it { }]
     set creator_url [contact::url -party_id $creation_id]
     set creator_name [contact::name -party_id $creation_id]
     template::element::create add_edit creator \
