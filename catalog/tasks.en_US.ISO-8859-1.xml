@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<message_catalog package_key="tasks" package_version="0.1d" locale="en_US" charset="ISO-8859-1">
+<message_catalog package_key="tasks" package_version="0.1d1" locale="en_US" charset="ISO-8859-1">
 
   <msg key="a_Task">a Task</msg>
   <msg key="Add_Task">Add Task</msg>
+  <msg key="Add_task_to">Add Task To</msg>
   <msg key="AddEdit">Add/Edit</msg>
   <msg key="Assign_Process">Assign Process</msg>
   <msg key="Cancel">Cancel</msg>
@@ -20,6 +21,8 @@
   <msg key="Follow_Up_Call">Follow Up Call</msg>
   <msg key="Follow_Up_Email">Follow Up Email</msg>
   <msg key="Have_they_responded">Have they responded?</msg>
+  <msg key="if_blank_there_is_no">If blank there is no due date</msg>
+  <msg key="Important">Important</msg>
   <msg key="lt_Add_Task_and_Add_Anot">Add Task and Add Another</msg>
   <msg key="lt_Add_Task_save________">Add Task} save}
         {{&lt;#_ Add Task and Add Another</msg>
@@ -33,8 +36,8 @@
   <msg key="lt_Standard_tasks_are_ca">Standard tasks are cannot be used in conjunction with custom tasks</msg>
   <msg key="lt_The_task_a_hreftaskst">The task &lt;a href=&quot;/tasks/%task_url%&quot;&gt;%task%&lt;/a&gt; was added</msg>
   <msg key="lt_The_task_a_hreftaskst_1">The task &lt;a href=&quot;/tasks/%task_url%&quot;&gt;%title%&lt;/a&gt; was updated</msg>
-  <msg key="lt_The_task_was">The task &quot;%task_title%&quot; was deleted</msg>
   <msg key="lt_The_task_task_was_add">The task &quot;%task%&quot; was added to %names%</msg>
+  <msg key="lt_The_task_was">The task &quot;%task_title%&quot; was deleted</msg>
   <msg key="lt_The_tasks_task_list_w">The tasks %task_list% were deleted</msg>
   <msg key="lt_these_num_entries_tas">these %num_entries% tasks</msg>
   <msg key="lt_Update_and_Add_New_Ta">Update and Add New Task</msg>
@@ -43,12 +46,19 @@
   <msg key="Mark_Done">Mark %pretty_task% as Done</msg>
   <msg key="more">more</msg>
   <msg key="No_Cancel">No, Cancel</msg>
+  <msg key="Normal">Normal</msg>
   <msg key="Not_Allowed">Not Allowed</msg>
   <msg key="Not_Done">Not Done</msg>
+  <msg key="Not_Important">Not Important</msg>
   <msg key="Notes">Notes</msg>
   <msg key="Priority">Priority</msg>
   <msg key="Process">Process</msg>
+  <msg key="Reassign">Reassign</msg>
+  <msg key="Reassign_selected">Reassign Selected Tasks</msg>
+  <msg key="Reassign_Tasks">Reassign Tasks</msg>
   <msg key="Select_process">Select process:</msg>
+  <msg key="Select_the_user">Select the user to assign the tasks.</msg>
+  <msg key="Select_the_user_to">Select the user to assign the task. If &quot;blank&quot; then the task will be assigned to yourself.</msg>
   <msg key="Send_Birthday_Card">Send Birthday Card</msg>
   <msg key="Send_Class_Schedule">Send Class Schedule</msg>
   <msg key="Send_Letter">Send Letter</msg>
@@ -64,6 +74,8 @@
   <msg key="these_tasks">these %num_entries% tasks</msg>
   <msg key="this_task">this task</msg>
   <msg key="Update">Update</msg>
+  <msg key="Very_Important">Very Important</msg>
   <msg key="View_next">View next</msg>
   <msg key="Yes">Yes</msg>
+  <msg key="You_can_either_use">You can either use a standard task or a custom task, but not both</msg>
 </message_catalog>
