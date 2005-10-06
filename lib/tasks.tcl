@@ -27,12 +27,16 @@ set done_url [export_vars -url -base "${tasks_url}contact" {orderby {status_id 2
 set not_done_url [export_vars -url -base "${tasks_url}contact" {orderby {status_id 1} {party_id $contact_id}}]
 set return_url "[ad_conn url]?[ad_conn query]"
 set add_url [export_vars -base "${tasks_url}task" {return_url orderby status_id {party_id $contact_id}}]
+set bulk_actions [list "[_ tasks.Reassign]" "reassign-task" "[_ tasks.Reassign_selected]"]
 
 set package_id [ad_conn package_id]
 
 template::list::create \
     -name tasks \
     -multirow tasks \
+    -bulk_actions $bulk_actions \
+    -bulk_action_method post \
+    -bulk_action_export_vars { } \
     -key task_id \
     -elements {
         deleted_p {
