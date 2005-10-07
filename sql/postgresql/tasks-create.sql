@@ -1,3 +1,120 @@
+create table tasks (
+        task_id                 integer
+                                constraint tasks_pk
+                                primary key
+                                constraint tasks_task_fk
+                                references acs_objects,
+        party_id                integer
+                                constraint tasks_party_fk
+                                references parties,
+        object_id               integer
+                                constraint tasks_object_fk
+                                references acs_objects,
+        process_id              integer
+                                constraint tasks_process_fk
+                                references pm_process,
+        title                   varchar(1000),
+        description             text,
+        mime_type               varchar(200) default 'text/plain'
+                                constraint tasks_mime_type_fk
+                                references cr_mime_types,
+        comment                 text,
+        due_date                timestamptz,
+        priority                integer default 0,
+        status                  char(1) default 'o'
+                                constraint tasks_status_ck
+                                check (status in ('o', 'c'))
+);
+
+
+create index tasks_party_idx on tasks(party_id);
+create index tasks_object_idx on tasks(object_id);
+create index tasks_due_date_idx on tasks(due_date);
+create index tasks_status_idx on tasks(status);
+
+create function inline_0 ()
+returns integer as'
+begin
+    perform acs_object_type__create_type(
+        ''tasks_task'',
+        ''Tasks Task'',
+        ''Tasks Tasks'',
+        ''acs_object'',
+        ''tasks'',
+        ''task_id'',
+        ''tasks'',
+        ''f'',
+        null,
+        null
+    );
+
+    return null;
+end;' language 'plpgsql';
+
+select inline_0();
+drop function inline_0();
+
+select define_function_args('tasks__new','party_id,object_id,process_id,title,description,mime_type;text/plain,comment,due_date,priority;0,status;o,creation_date;now,creation_user,creation_ip,package_id');
+
+create or replace function tasks__new (
+  tasks.party_id%TYPE,
+  tasks.object_id%TYPE,
+  tasks.process_id%TYPE,
+  tasks.title%TYPE,
+  tasks.description%TYPE,
+  tasks.mime_type%TYPE,
+  tasks.comment%TYPE,
+  tasks.due_date%TYPE,
+  tasks.priority%TYPE,
+  tasks.status%TYPE,
+  acs_objects.creation_date%TYPE,
+  acs_objects.creation_user%TYPE,
+  acs_objects.creation_ip%TYPE,
+  acs_objects.package_id%TYPE
+) returns integer as '
+declare
+  new__party_id      alias for $1;
+  new__object_id     alias for $2;
+  new__process_id    alias for $3;
+  new__title         alias for $4;
+  new__description   alias for $5;
+  new__mime_type     alias for $6;
+  new__comment       alias for $7;
+  new__due_date      alias for $8;
+  new__priority      alias for $9;
+  new__status        alias for $10;
+  new__creation_date alias for $11;
+  new__creation_user alias for $12;
+  new__creation_ip   alias for $13;
+  new__package_id    alias for $14;
+  v_task_id        tasks.task_id%TYPE;
+begin
+  -- Create the object
+
+  v_task_id := acs_object__new(
+      null,
+      'tasks_task', 
+      new__creation_date, 
+      new__creation_user, 
+      new__creation_ip, 
+      new__package_id,
+      ''t'',
+      new__title,
+      new__package_id
+  );
+
+  insert into tasks (
+    task_id, folder_id, party_id, object_id, process_id, title, description, mime_type,
+    comment, due_date, priority, status
+  ) values (
+    v_task_id, new__folder_id, new__party_id, new__object_id, new__process_id, new__title,
+    new__description, new__mime_type, new__comment, new__due_date, new__priority, new__status
+  );
+
+  return v_task_id;
+
+end;' language 'plpgsql';
+
 -----------------------------------------------------
 -- 
 -- Create the data model for the timecard application

@@ -17,7 +17,7 @@
                                      and group_distinct_member_map.group_id = '11428599'
                                      [contact::search_clause -and -search_id $search_id -query $query -party_id "parties.party_id" -revision_id "revision_id"] )
                 and role_id = '1' ) assigned_tasks
-     where ci.parent_id = '$project_id'
+     where ci.parent_id = :project_id
        and ci.item_id = pt.task_id
        and ci.live_revision = ptr.task_revision_id
        and ci.live_revision = cr.revision_id
@@ -27,9 +27,9 @@
        and pt.task_id = assigned_tasks.task_id 
        and pt.task_id = ao.object_id
        and CASE WHEN ao.creation_user = assigned_tasks.party_id THEN
-                CASE WHEN assigned_tasks.party_id = '$user_id' THEN 'f'::boolean ELSE 't'::boolean END
+                CASE WHEN assigned_tasks.party_id = :user_id THEN 'f'::boolean ELSE 't'::boolean END
                 ELSE 't'::boolean END
-       and ptr.end_date < ( now() + '$tasks_interval days'::interval )
+       and ptr.end_date < ( now() + :tasks_interval || ' days'::interval )
     [template::list::orderby_clause -orderby -name tasks]
       </querytext>
 </fullquery>
@@ -50,7 +50,7 @@
                                      and group_distinct_member_map.group_id = '11428599'
                                      [contact::search_clause -and -search_id $search_id -query $query -party_id "parties.party_id" -revision_id "revision_id"] )
                 and role_id = '1' ) assigned_tasks
-     where ci.parent_id = '$project_id'
+     where ci.parent_id = :project_id
        and ci.item_id = pt.task_id
        and ci.live_revision = ptr.task_revision_id
        and ci.live_revision = cr.revision_id
@@ -60,9 +60,9 @@
        and pt.task_id = assigned_tasks.task_id 
        and pt.task_id = ao.object_id
        and CASE WHEN ao.creation_user = assigned_tasks.party_id THEN
-                CASE WHEN assigned_tasks.party_id = '$user_id' THEN 'f'::boolean ELSE 't'::boolean END
+                CASE WHEN assigned_tasks.party_id = :user_id THEN 'f'::boolean ELSE 't'::boolean END
                 ELSE 't'::boolean END
-       and ptr.end_date < ( now() + '$tasks_interval days'::interval )
+       and ptr.end_date < ( now() + :tasks_interval || ' days'::interval )
       </querytext>
 </fullquery>
 
@@ -95,7 +95,7 @@
        and CASE WHEN ao.creation_user = assigned_tasks.party_id THEN
                 CASE WHEN assigned_tasks.party_id = :user_id THEN 'f'::boolean ELSE 't'::boolean END
                 ELSE 't'::boolean END
-       and ptr.end_date < ( now() + '$tasks_interval days'::interval )
+       and ptr.end_date < ( now() + :tasks_interval || ' days'::interval )
     [template::list::page_where_clause -and -name tasks -key pt.task_id]
     [template::list::orderby_clause -orderby -name tasks]
       </querytext>

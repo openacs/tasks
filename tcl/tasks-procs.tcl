@@ -15,6 +15,64 @@ namespace eval tasks::process::task {}
 namespace eval tasks::process::instance {}
 
 
+ad_proc -public tasks::new {
+    -party_id:required
+    {-object_id ""}
+    {-process_id ""}
+    -title:required
+    {-description ""}
+    {-mime_type "text/plain"}
+    {-comment ""}
+    -due_date:required
+    {-priority 0}
+    {-status "o"}
+    {-user_id ""}
+    {-ip_addr ""}
+    {-package_id ""}
+} {
+    insert new task
+} {
+    if {[empty_string_p $package_id]} {
+	set package_id [ad_conn package_id]
+    }
+    if {[empty_string_p $user_id]} {
+	set user_id [ad_conn user_id]
+    }
+    if {[empty_string_p $ip_addr]} {
+	set ip_addr [ad_conn peeraddr]
+    }
+
+    set task_id [db_exec_plsql create_task {}]
+
+    return $task_id
+}
+
+ad_proc -public tasks::edit {
+    -task_id:required
+    -title:required
+    {-description ""}
+    {-mime_type "text/plain"}
+    {-comment ""}
+    -due_date:required
+    {-priority 0}
+    {-status "o"}
+    {-user_id ""}
+    {-ip_addr ""}
+} {
+    update task
+} {
+    if {[empty_string_p $user_id]} {
+	set user_id [ad_conn user_id]
+    }
+    if {[empty_string_p $ip_addr]} {
+	set ip_addr [ad_conn peeraddr]
+    }
+
+    db_dml update_task {}
+    db_dml update_object {}
+}
+
+
 ad_proc -public tasks::project_id {
     {-package_id ""}
 } {

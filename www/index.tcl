@@ -104,7 +104,6 @@ template::list::create \
 	query {}
 	page_size {}
 	tasks_interval {}
-	process_instance {}
     } \
     -orderby {
         default_value $orderby
@@ -157,7 +156,6 @@ db_multirow -extend { contact_url description_html task_url task_plus_url task_m
     regsub -all {LiNeBrEaK} $description_html {\&nbsp;\&nbsp;\&#182;\&nbsp;} description_html
     regsub -all " " $due_date {\&nbsp;} due_date
 }
-
 
 set tasks_count [db_string tasks_count {} -default {0}]
 
