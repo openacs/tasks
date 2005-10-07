@@ -22,6 +22,14 @@
         and ot.creation_user = :user_id
         and t.start_date < now()
         and t.due_date < ( now() + '$tasks_interval days'::interval )
+        and t.party_id in ( select parties.party_id
+                            from parties
+                            left join cr_items on (parties.party_id = cr_items.item_id)
+                            left join cr_revisions on (cr_items.latest_revision = cr_revisions.revision_id),
+                                 group_distinct_member_map
+                            where parties.party_id = group_distinct_member_map.member_id
+                            and group_distinct_member_map.group_id = :group_id
+                            [contact::search_clause -and -search_id $search_id -query $query -party_id "parties.party_id" -revision_id "revision_id"] ))
         [template::list::page_where_clause -and -name tasks -key t.task_id]
         [template::list::orderby_clause -orderby -name tasks]
     </querytext>
@@ -31,10 +39,6 @@
     <querytext>
         select t.task_id
         from t_task_status s, acs_objects ot, t_tasks t
-        left outer join t_process_instances pi
-        on (pi.process_instance_id = t.process_instance_id)
-        left outer join t_processes p
-        on (p.process_id = pi.process_id)
         where s.status_id = t.status_id
         and t.status_id <> 2
         and ot.object_id = t.task_id
@@ -42,6 +46,14 @@
         and ot.creation_user = :user_id
         and t.start_date < now()
         and t.due_date < ( now() + '$tasks_interval days'::interval )
+        and t.party_id in ( select parties.party_id
+                            from parties
+                            left join cr_items on (parties.party_id = cr_items.item_id)
+                            left join cr_revisions on (cr_items.latest_revision = cr_revisions.revision_id),
+                                 group_distinct_member_map
+                            where parties.party_id = group_distinct_member_map.member_id
+                            and group_distinct_member_map.group_id = :group_id
+                            [contact::search_clause -and -search_id $search_id -query $query -party_id "parties.party_id" -revision_id "revision_id"] ))
         [template::list::orderby_clause -orderby -name tasks]
     </querytext>
 </fullquery>
@@ -50,10 +62,6 @@
     <querytext>
         select count(*)
         from t_task_status s, acs_objects ot, t_tasks t
-        left outer join t_process_instances pi
-        on (pi.process_instance_id = t.process_instance_id)
-        left outer join t_processes p
-        on (p.process_id = pi.process_id)
         where s.status_id = t.status_id
         and t.status_id <> 2
         and ot.object_id = t.task_id
@@ -61,6 +69,14 @@
         and ot.creation_user = :user_id
         and t.start_date < now()
         and t.due_date < ( now() + '$tasks_interval days'::interval )
+        and t.party_id in ( select parties.party_id
+                            from parties
+                            left join cr_items on (parties.party_id = cr_items.item_id)
+                            left join cr_revisions on (cr_items.latest_revision = cr_revisions.revision_id),
+                                 group_distinct_member_map
+                            where parties.party_id = group_distinct_member_map.member_id
+                            and group_distinct_member_map.group_id = :group_id
+                            [contact::search_clause -and -search_id $search_id -query $query -party_id "parties.party_id" -revision_id "revision_id"] ))
     </querytext>
 </fullquery>
 

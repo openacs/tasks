@@ -12,9 +12,13 @@ if {![exists_and_not_null party_id]} {
     # so we can unset it later :).
     set party_id ""
     unset party_id
+    set page_query_name own_tasks_pagination
+    set query_name own_tasks
 } else {
     set contact_id $party_id 
     set user_id2 ""
+    set page_query_name contact_tasks_pagination
+    set query_name contact_tasks
 }
 
 if { ![exists_and_not_null orderby] } {
@@ -30,6 +34,7 @@ set add_url [export_vars -base "${tasks_url}task" {return_url orderby status_id 
 set bulk_actions [list "[_ tasks.Reassign]" "reassign-task" "[_ tasks.Reassign_selected]"]
 
 set package_id [ad_conn package_id]
+set group_id "11428599"
 
 template::list::create \
     -name tasks \
@@ -38,6 +43,9 @@ template::list::create \
     -bulk_action_method post \
     -bulk_action_export_vars { } \
     -key task_id \
+    -page_size "50" \
+    -page_flush_p $page_flush_p \
+    -page_query_name $page_query_name \
     -elements {
         deleted_p {
 	    label {<img src="/resources/acs-subsite/checkboxchecked.gif" alt="[_ tasks.Not_Done]" border="0" height="13" width="13">}
@@ -102,18 +110,23 @@ template::list::create \
 	user_id {
 	    where_clause {ao.creation_user = :user_id}
 	}
+	search_id {}
+	query {}
+	page_size {}
+	tasks_interval {}
+	process_instance {}
     } -orderby {
         default_value "priority,desc"
         date {
             label "[_ tasks.Due]"
-            orderby_desc "CASE WHEN t.status_id = 1 THEN t.due_date ELSE t.completed_date END desc, t.priority, lower(t.title)"
-            orderby_asc "CASE WHEN t.status_id = 1 THEN t.due_date ELSE t.completed_date END asc, t.priority, lower(t.title)"
+            orderby_desc "CASE WHEN t.status_id <> 2 THEN t.due_date ELSE t.completed_date END desc, t.priority, lower(t.title)"
+            orderby_asc "CASE WHEN t.status_id <> 2 THEN t.due_date ELSE t.completed_date END asc, t.priority, lower(t.title)"
             default_direction desc
         }
         priority {
             label "[_ tasks.Priority]"
-            orderby_desc "t.status_id, t.priority desc, CASE WHEN t.status_id = 1 THEN t.due_date ELSE t.completed_date END desc, lower(t.title)"
-            orderby_asc "t.status_id, t.priority asc, CASE WHEN t.status_id = 1 THEN t.due_date ELSE t.completed_date END asc, lower(t.title)"
+            orderby_desc "t.status_id, t.priority desc, CASE WHEN t.status_id <> 2 THEN t.due_date ELSE t.completed_date END desc, lower(t.title)"
+            orderby_asc "t.status_id, t.priority asc, CASE WHEN t.status_id <> 2 THEN t.due_date ELSE t.completed_date END asc, lower(t.title)"
             default_direction desc
         }
         title {
@@ -136,7 +149,7 @@ template::list::create \
 	}
     }
 
-db_multirow -extend {creation_user_url contact_url complete_url done_p task_plus_url task_minus_url description_html task_url} -unclobber tasks get_tasks " " {
+db_multirow -extend {creation_user_url contact_url complete_url done_p task_plus_url task_minus_url description_html task_url} -unclobber tasks $query_name {} {
     set creation_user_url [contact::url -party_id $creation_user]
     regsub -all "/tasks/" $creation_user_url "/contacts/" creation_user_url
     set complete_url [export_vars -base "${tasks_url}mark-completed" -url {task_id orderby {party_id $contact_id} return_url}]

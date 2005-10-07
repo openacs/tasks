@@ -9,16 +9,14 @@ ad_page_contract {
     @return title Page title.
     @return context Context bar.
     @return tasks Multirow data set of tasks
-    @return task_term Terminology for tasks
-    @return task_term_lower Terminology for tasks (lower case)
-    @return project_term Terminology for projects
-    @return project_term_lower Terminology for projects (lower case)
 
     @param mine_p is used to make the default be the user, but
     still allow people to view everyone.
 
 } {
     {orderby ""}
+    {page:optional "1"}
+    {page_size:optional "25"}
     {party_id ""}
     {searchterm ""}
     {mine_p "t"}

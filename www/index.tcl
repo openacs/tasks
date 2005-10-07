@@ -9,7 +9,7 @@ ad_page_contract {
     {format "normal"}
     {search_id:integer ""}
     {query ""}
-    {page:optional}
+    {page:optional "1"}
     {page_size:integer "25"}
     {tasks_interval:integer "7"}
     {page_flush_p "f"}
@@ -23,7 +23,6 @@ set package_id [ad_conn package_id]
 set url [ad_conn url]
 
 set return_url [export_vars -base $url -url {orderby format search_id query page page_size tasks_interval {page_flush_p t}}]
-
 
 if { $orderby == "contact_name,asc" } {
     set name_order 0
@@ -159,7 +158,7 @@ db_multirow -extend { contact_url description_html task_url task_plus_url task_m
 
 set tasks_count [db_string tasks_count {} -default {0}]
 
-
+set package_id [site_node::get_element -url "/contacts" -element object_id]
 if { [exists_and_not_null search_id] } {
     contact::search::log -search_id $search_id
 }
