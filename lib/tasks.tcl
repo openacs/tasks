@@ -44,7 +44,6 @@ template::list::create \
     -bulk_action_export_vars { } \
     -key task_id \
     -page_size "50" \
-    -page_flush_p $page_flush_p \
     -page_query_name $page_query_name \
     -elements {
         deleted_p {
