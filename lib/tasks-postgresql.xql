@@ -42,7 +42,7 @@
                                  group_distinct_member_map
                             where parties.party_id = group_distinct_member_map.member_id
                             and group_distinct_member_map.group_id = :group_id
-                            [contact::search_clause -and -search_id $search_id -query $query -party_id "parties.party_id" -revision_id "revision_id"] ))
+                            [contact::search_clause -and -search_id $search_id -query $query -party_id "parties.party_id" -revision_id "revision_id"] )
     	[template::list::page_where_clause -and -name tasks -key t.task_id]
 	[template::list::filter_where_clauses -and -name tasks]
      	[template::list::orderby_clause -orderby -name tasks]
@@ -66,7 +66,7 @@
                                  group_distinct_member_map
                             where parties.party_id = group_distinct_member_map.member_id
                             and group_distinct_member_map.group_id = :group_id
-                            [contact::search_clause -and -search_id $search_id -query $query -party_id "parties.party_id" -revision_id "revision_id"] ))
+                            [contact::search_clause -and -search_id $search_id -query $query -party_id "parties.party_id" -revision_id "revision_id"] )
 	[template::list::filter_where_clauses -and -name tasks]
         [template::list::orderby_clause -orderby -name tasks]
     </querytext>
