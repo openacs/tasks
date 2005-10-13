@@ -1,0 +1,26 @@
+<master src="@portlet_layout@">
+<property name="portlet_title">#tasks.Tasks#</property>
+
+<table width="100%">
+<tr>
+  <td colspan="2" class="fill-list-bottom">
+    <table border="0" cellpadding="1" cellspacing="1" width="100%">
+      <tr>
+        <td>
+	<include src="/packages/tasks/lib/tasks"
+		user_id=@user_id@
+ 		query="@query@"
+ 		search_id="@search_id@"
+		tasks_interval="@tasks_interval@"
+		orderby="@orderby@"
+		page="@page@"
+		page_size="@page_size@"
+		page_flush_p="@page_flush_p@" />
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+</table>
+
+
