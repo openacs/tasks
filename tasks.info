@@ -7,22 +7,23 @@
     <initial-install-p>f</initial-install-p>
     <singleton-p>f</singleton-p>
     
-    <version name="0.1d2" url="http://openacs.org/repository/download/apm/tasks-0.1d2.apm">
+    <version name="0.1d3" url="http://openacs.org/repository/download/apm/tasks-0.1d3.apm">
         <owner url="mailto:openacs@geddert.com">Matthew Geddert</owner>
         <summary>Keep track of tasks to do.</summary>
+        <release-date>2005-10-13</release-date>
         <description format="text/html">This package uses project manager tcl and sql as the base for a simple task program without project manager's complexity.</description>
+        <maturity>0</maturity>
 
-        <provides url="tasks" version="0.1d2"/>
+        <provides url="tasks" version="0.1d3"/>
         <requires url="project-manager" version="2.70a1"/>
         <requires url="workflow" version="2.0.0b4"/>
-        <requires url="contacts" version="1.0d15"/>
 
         <callbacks>
             <callback type="after-install"  proc="tasks::install::package_install"/>
             <callback type="after-upgrade"  proc="tasks::install::after_upgrade"/>
         </callbacks>
         <parameters>
-        <!-- No version parameters -->
+            <parameter datatype="string"  min_n_values="1"  max_n_values="1"  name="DefaultPortletLayout"  default="/packages/tasks/lib/portlet" description="The src of the portlet layout to use in the portlets." section_name="Templates"/>
         </parameters>
 
     </version>
