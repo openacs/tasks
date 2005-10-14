@@ -5,13 +5,14 @@ ad_page_contract {
     @creation-date 2004-07-28
     @cvs-id $Id$
 } {
-    {orderby:optional ""}
+    {tasks_orderby:optional ""}
     {format "normal"}
     {search_id:integer ""}
     {query ""}
     {page:optional "1"}
     {page_size:integer "25"}
     {tasks_interval:integer "7"}
+    {page_flush_p "0"}
 }
 
 set title "[_ tasks.Tasks]"
@@ -59,4 +60,3 @@ ad_form -name "search" -method "GET" -export {orderby page_size format} -form $f
     } -after_submit {
     }
 
-set orderby ""

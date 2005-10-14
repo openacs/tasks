@@ -60,7 +60,8 @@ template::list::create \
     -bulk_action_export_vars { } \
     -selected_format normal \
     -key task_id \
-    -page_size "50" \
+    -orderby_name tasks_orderby \
+    -page_size $page_size \
     -page_flush_p 0 \
     -page_query_name $page_query_name \
     -elements {
