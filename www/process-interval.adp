@@ -3,4 +3,4 @@
 <property name="title">@title@</property>
 <property name="context">@context@</property>
 
-done.
+#tasks.Done#.
