@@ -60,7 +60,7 @@ ad_proc -public -callback contacts::bulk_actions -impl tasks {
 } {
     Add task history to this party. Return as list
 } {
-    ::template::multirow append $multirow "Add Task" "/tasks/task" "Add a task to the selected contacts"
+    ::template::multirow append $multirow "[_ tasks.Add_Task]" "/tasks/task" "[_ tasks.Add_a_task_to_the]"
 }
 
 
