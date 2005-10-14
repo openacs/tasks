@@ -11,7 +11,7 @@
   <msg key="Custom_Task">Spezifische Aufgabe</msg>
   <msg key="Date">Datum</msg>
   <msg key="Delete">Löschen</msg>
-  <msg key="Delete_task_pretty">Löschen $task_pretty</msg>
+  <msg key="Delete_task_pretty">Löschen %task_pretty%</msg>
   <msg key="Done">Erledigt</msg>
   <msg key="Due">Fällig</msg>
   <msg key="Follow_Up_Call">Follow Up Anruf</msg>
@@ -20,19 +20,19 @@
   <msg key="lt_Add_Task_and_Add_Anot">Eine Aufgabe und einen weitere hinzufügen </msg>
   <msg key="lt_Add_Task_save________">Aufgabe hinzufügen} save} {{&lt;#_ Add Task und eine weitere hinzufügen</msg>
   <msg key="lt_Are_you_sure_you_want">Sind Sie sich sicher, dass Sie diesen Prozess löschen wollen: %one_line% ?</msg>
-  <msg key="lt_Are_you_sure_you_want_1">Sind Sie sich sicher, dass Sie $task2_pretty löschen wollen?</msg>
+  <msg key="lt_Are_you_sure_you_want_1">Sind Sie sich sicher, dass Sie %task2_pretty% löschen wollen?</msg>
   <msg key="lt_Delete_from_Recruitin">Vom Recruiting System löschen</msg>
   <msg key="lt_Either_a_custom_task_">Es ist entweder eine Standardaufgabe oder eine spezifische Aufgabe (custom task) erforderlich.</msg>
-  <msg key="lt_Originally_created_by">Ursprünglich erzeugt von &lt;a href=\&quot;[contact::url -party_id $creation_id]\&quot;&gt;[contact::name -party_id $creation_id]&lt;/a&gt;</msg>
+  <msg key="lt_Originally_created_by">Ursprünglich erzeugt von &lt;a href=\&quot;%creator_url%\&quot;&gt;%creator_name%&lt;/a&gt;</msg>
   <msg key="lt_Provide_Promotional_I">Unterlagen zuschicken</msg>
   <msg key="lt_Send_Personal_NoteLet">Notiz/Brief zuschicken</msg>
   <msg key="lt_Standard_tasks_are_ca">Standardaufgaben können nicht in Kombination mit spezifischen Aufgaben (custom tasks) genutzt werden</msg>
-  <msg key="lt_The_task_a_hreftaskst">Die Aufgabe &lt;a href=\&quot;/tasks/${task_url}\&quot;&gt;$task&lt;/a&gt; wurde hinzugefügt</msg>
-  <msg key="lt_The_task_a_hreftaskst_1">Die Aufgabe wurde &lt;a href=\&quot;/tasks/${task_url}\&quot;&gt;$title&lt;/a&gt;  upgedated</msg>
-  <msg key="lt_The_task_lindex_task_">Die Aufgabe \&quot;[lindex $task_titles 0]\&quot; wurde gelöscht</msg>
-  <msg key="lt_The_task_task_was_add">Die Aufgaben \&quot;$task\&quot; wurden zu $names hinzugefügt</msg>
-  <msg key="lt_The_tasks_task_list_w">Die Aufgaben ${task_list} wurden gelöscht</msg>
-  <msg key="lt_these_num_entries_tas">Diese $num_entries Aufgaben</msg>
+  <msg key="lt_The_task_a_hreftaskst">Die Aufgabe &lt;a href=\&quot;/tasks/%task_url%\&quot;&gt;%task%&lt;/a&gt; wurde hinzugefügt</msg>
+  <msg key="lt_The_task_a_hreftaskst_1">Die Aufgabe wurde &lt;a href=\&quot;/tasks/%task_url%\&quot;&gt;%title%&lt;/a&gt;  upgedated</msg>
+  <msg key="lt_The_task_task_was_add">Die Aufgaben \&quot;%task%\&quot; wurden zu %names% hinzugefügt</msg>
+  <msg key="lt_The_task_was">Die Aufgabe \&quot;%task_title%\&quot; wurde gelöscht</msg>
+  <msg key="lt_The_tasks_task_list_w">Die Aufgaben %task_list% wurden gelöscht</msg>
+  <msg key="lt_these_num_entries_tas">Diese %num_entries% Aufgaben</msg>
   <msg key="lt_Update_and_Add_New_Ta">Update und Anlegen neue Aufgabe</msg>
   <msg key="lt_You_are_not_allowed_t">Sie sind</msg>
   <msg key="more">mehr</msg>

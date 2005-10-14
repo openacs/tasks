@@ -4,12 +4,14 @@
 <table widht="50%">
 <tr>
     <td>
-	<include src="/packages/tasks/lib/tasks-portlet"
+	<include src="/packages/tasks/lib/tasks"
 		 party_id=@party_id@
 		 orderby="@orderby@"
 		 page="@page@"
 		 page_size="@page_size@"
-		 page_flush_p="f"/>
+                 search_id=""
+                 row_list="@row_list@"
+                 query=""/>
     </td>
 </tr>
 </table>

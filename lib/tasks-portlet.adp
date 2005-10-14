@@ -8,7 +8,7 @@
       <tr>
         <td>
 	<include src="/packages/tasks/lib/tasks"
-		user_id=@user_id@
+		party_id=@party_id@
  		query="@query@"
  		search_id="@search_id@"
 		tasks_interval="@tasks_interval@"

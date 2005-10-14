@@ -89,23 +89,39 @@ if { [ns_queryget "formbutton:delete"] != "" } {
 set status_options [db_list_of_lists status_options { }]
 set status_options [lang::util::localize $status_options]
 
-ad_form -name add_edit \
-    -cancel_url $return_url \
-    -cancel_label "[_ tasks.Cancel]" \
-    -edit_buttons $edit_buttons \
-    -form {
-        task_id:key
-        return_url:text(hidden),optional
-        orderby:text(hidden),optional
-        status_id:integer(hidden),optional
-        party_id:integer(hidden)
-        other_party_ids:text(hidden),optional
-	{names:text(hidden),optional {label "[_ tasks.Add_task_to]"}}
-        {assign_party_id:text(select),optional 
+ad_form -name add_edit -form {
+    task_id:key
+    return_url:text(hidden),optional
+    orderby:text(hidden),optional
+    status_id:integer(hidden),optional
+    party_id:integer(hidden)
+    other_party_ids:text(hidden),optional
+    {names:text(hidden),optional {label "[_ tasks.Add_task_to]"}}
+}
+
+if {[exists_and_not_null party_id] && $party_id != $user_id} {
+    ad_form -extend -name add_edit -form {
+	{assign_party_id:text(hidden) {value $party_id}}
+	{assign_party:text(inform),optional 
+	    {label "[_ tasks.Add_task_to]"}
+	    {value $names}
+	}
+    }
+} else {
+    ad_form -extend -name add_edit -form {
+	{assign_party_id:text(select),optional 
 	    {label "[_ tasks.Add_task_to]"}
 	    {options { $assign_parties_options}}
 	    {help_text "[_ tasks.Select_the_user_to]"}
 	}
+    }
+}
+
+ad_form -extend -name add_edit \
+    -cancel_url $return_url \
+    -cancel_label "[_ tasks.Cancel]" \
+    -edit_buttons $edit_buttons \
+    -form {
         {task_prescribed:text(select),optional
             {label "[_ tasks.Standard_Task]"}
 	    {options {
@@ -200,7 +216,6 @@ ad_form -name add_edit \
     } -new_data {
 
 	foreach party $all_parties {
-
 	    set task_id [tasks::task::new \
 			     -title ${task} \
 			     -description ${description} \

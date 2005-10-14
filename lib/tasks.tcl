@@ -4,12 +4,14 @@ set tasks_url "/tasks/"
 if {![exists_and_not_null party_id]} {
 
     # the user_id is used for the filter. user_id2 for comparison
-    set user_id [ad_conn user_id]
+    if {![exists_and_not_null user_id]} {
+	set user_id [ad_conn user_id]
+    }
     set contact_id $user_id
     set user_id2 $user_id
-    
-    # We don't know if the party has been provided, so we first set it to empty
-    # so we can unset it later :).
+    if {$user_id == [ad_conn user_id]} {
+	set user_id2 ""
+    }
     set party_id ""
     unset party_id
     set page_query_name own_tasks_pagination
@@ -21,11 +23,27 @@ if {![exists_and_not_null party_id]} {
     set query_name contact_tasks
 }
 
+set package_id [apm_package_id_from_key tasks]
+
+if { ![exists_and_not_null tasks_interval] } {
+    set tasks_interval 7
+}
 if { ![exists_and_not_null orderby] } {
     set orderby "priority,desc"
 }
 if { ![exists_and_not_null status_id] } {
     set status_id "1"
+}
+if { ![exists_and_not_null package_id] } {
+    set package_id [ad_conn package_id]
+}
+if { ![exists_and_not_null row_list] } {
+    set row_list {checkbox {} deleted_p {} priority {} title {} process_title {} contact_name {} date {} creation_user {}}
+}
+if {[exists_and_not_null search_id]} {
+    set group_where_clause ""
+} else {
+    set group_where_clause "and group_distinct_member_map.group_id = [contacts::default_group]"
 }
 set done_url [export_vars -url -base "${tasks_url}contact" {orderby {status_id 2} {party_id $contact_id}}]
 set not_done_url [export_vars -url -base "${tasks_url}contact" {orderby {status_id 1} {party_id $contact_id}}]
@@ -33,8 +51,6 @@ set return_url "[ad_conn url]?[ad_conn query]"
 set add_url [export_vars -base "${tasks_url}task" {return_url orderby status_id {party_id $contact_id}}]
 set bulk_actions [list "[_ tasks.Reassign]" "reassign-task" "[_ tasks.Reassign_selected]"]
 
-set package_id [ad_conn package_id]
-set group_id "11428599"
 
 template::list::create \
     -name tasks \
@@ -42,6 +58,7 @@ template::list::create \
     -bulk_actions $bulk_actions \
     -bulk_action_method post \
     -bulk_action_export_vars { } \
+    -selected_format normal \
     -key task_id \
     -page_size "50" \
     -page_flush_p 0 \
@@ -82,6 +99,10 @@ template::list::create \
 		</else>
 	    }
 	}
+        contact_name {
+	    label "[_ tasks.Contact]"
+	    link_url_eval $contact_url
+	} 
         date {
 	    label "[_ tasks.Date]"
 	    display_template {
@@ -141,15 +162,28 @@ template::list::create \
             orderby_asc "lower(p.title) asc, t.priority desc, t.due_date asc"
 	    default_direction asc
 	}
+	contact_name {
+	    label "[_ tasks.Created_By]"
+            orderby_desc "lower(contact__name(t.party_id)) desc, t.due_date asc, t.priority, lower(t.title)"
+            orderby_asc "lower(contact__name(t.party_id)) asc, t.due_date asc, t.priority, lower(t.title)"
+	    default_direction asc
+	}
 	creation_user {
 	    label "[_ tasks.Created_By]"
             orderby_desc "lower(contact__name(ao.creation_user)) desc, t.due_date asc, t.priority, lower(t.title)"
             orderby_asc "lower(contact__name(ao.creation_user)) asc, t.due_date asc, t.priority, lower(t.title)"
 	    default_direction asc
 	}
+    } -formats {
+	normal {
+	    label "Table"
+	    layout table
+	    row $row_list
+	}
     }
 
 db_multirow -extend {creation_user_url contact_url complete_url done_p task_plus_url task_minus_url description_html task_url} -unclobber tasks $query_name {} {
+    set contact_url [contact::url -party_id $party_id]
     set creation_user_url [contact::url -party_id $creation_user]
     regsub -all "/tasks/" $creation_user_url "/contacts/" creation_user_url
     set complete_url [export_vars -base "${tasks_url}mark-completed" -url {task_id orderby {party_id $contact_id} return_url}]
