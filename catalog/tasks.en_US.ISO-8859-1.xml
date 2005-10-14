@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<message_catalog package_key="tasks" package_version="0.1d1" locale="en_US" charset="ISO-8859-1">
+<message_catalog package_key="tasks" package_version="0.1d3" locale="en_US" charset="ISO-8859-1">
 
   <msg key="a_Task">a Task</msg>
+  <msg key="Add_a_task_to_the">Add a task to the selected contacts</msg>
   <msg key="Add_Task">Add Task</msg>
   <msg key="Add_task_to">Add Task To</msg>
   <msg key="AddEdit">Add/Edit</msg>
@@ -10,6 +11,7 @@
   <msg key="Cancel_do_not_delete">Cancel, do not delete</msg>
   <msg key="Comment">Comment</msg>
   <msg key="completed_sure">Are you sure you want to mark %pretty_entries% as done?</msg>
+  <msg key="Completed_Task">Completed Task</msg>
   <msg key="Contact">Contact</msg>
   <msg key="Created_By">Created By</msg>
   <msg key="Custom_Task">Custom Task</msg>
@@ -71,6 +73,7 @@
   <msg key="task_moved_up">The task &lt;a href=&quot;%task_url%&quot;&gt;%task%&lt;/a&gt; moved up 7 days</msg>
   <msg key="Tasks">Tasks</msg>
   <msg key="tasks_completed">The tasks %task_list% were marked done</msg>
+  <msg key="Tasks_Instance">Tasks Instance %package_id%</msg>
   <msg key="these_tasks">these %num_entries% tasks</msg>
   <msg key="this_task">this task</msg>
   <msg key="Update">Update</msg>
