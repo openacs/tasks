@@ -104,7 +104,7 @@ ad_proc -public tasks::initialize {
 	set package_id [ad_conn package_id]
     }
     if { [string is false [db_0or1row project_exists_p { select 1 from cr_folders where package_id = :package_id and label = 'Projects' }]] } {
-	pm::project::new -project_name "Tasks Instance $package_id" \
+	pm::project::new -project_name "[_ tasks.Tasks_Instance]" \
 	    -status_id "1" \
 	    -organization_id "" \
 	    -creation_user [ad_conn user_id] \
@@ -130,12 +130,16 @@ ad_proc -public tasks::task::new {
     {-start_date ""}
     {-due_date ""}
     {-package_id ""}
+    {-context_id ""}
 } {
     if { [empty_string_p $package_id] } {
         set package_id [ad_conn package_id]
     }
     set extra_vars [ns_set create]
-    set context_id $package_id
+
+    if { [empty_string_p $context_id] } {
+	set context_id $package_id
+    }
 
     oacs_util::vars_to_ns_set -ns_set $extra_vars -var_list {task_id process_instance_id process_task_id party_id object_id title description mime_type comment status_id priority start_date due_date package_id context_id}
 
