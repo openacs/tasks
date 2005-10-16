@@ -109,12 +109,20 @@ create table t_tasks (
         process_task_id         integer
                                 constraint t_tasks_process_task_fk
                                 references t_process_tasks,
+	-- The party_id is the party whom this task is associated with (e.g. the contact)
         party_id                integer
                                 constraint t_tasks_party_fk
                                 references parties,
+	-- The object_id of the Object that triggered this task. If you created an offer
+	-- and want to have a reminder to phone, the party_id would be the recipient of the offer
+	-- the object_id would be the offer_id and the creation_user (assignee who is doing the job)
+	-- would be yourself. 
+	-- As we are very bad in design we realized too late that it might make sense to change the 
+	-- assignee at a later stage, we now modify the creation_user for this. 
         object_id               integer
                                 constraint t_tasks_object_fk
                                 references acs_objects,
+	-- I wish this were content_items...
         title                   varchar(1000),
         description             text,
         mime_type               varchar(200) default 'text/plain',
