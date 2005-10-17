@@ -133,7 +133,7 @@ ad_proc -public tasks::task::new {
     {-context_id ""}
 } {
     if { [empty_string_p $package_id] } {
-        set package_id [ad_conn package_id]
+        set package_id [apm_package_id_from_key "tasks"]
     }
     set extra_vars [ns_set create]
 

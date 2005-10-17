@@ -207,7 +207,6 @@ db_multirow -extend {creation_user_url contact_url complete_url done_p task_plus
 			      -- $description]
     regsub -all {LiNeBrEaKLiNeBrEaK} $description_html {LiNeBrEaK} description_html
     regsub -all {LiNeBrEaK} $description_html {\&nbsp;\&nbsp;\&#182;\&nbsp;} description_html
-
-    regsub -all " " $due_date {\&nbsp;} due_date
-    regsub -all " " $completed_date {\&nbsp;} completed_date
+	regsub -all " " $due_date {\&nbsp;} due_date
+	regsub -all " " $completed_date {\&nbsp;} completed_date
 }
