@@ -108,7 +108,7 @@
       	and ao.object_id = t.task_id
         and ao.package_id = :package_id
       	and t.start_date < now()
-	and t.party_id = :party_id
+	$employee_where_clause
     	[template::list::page_where_clause -and -name tasks -key t.task_id]
 	[template::list::filter_where_clauses -and -name tasks]
      	[template::list::orderby_clause -orderby -name tasks]
@@ -124,7 +124,7 @@
         and ao.object_id = t.task_id
         and ao.package_id = :package_id
         and t.start_date < now()
-	and t.party_id = :party_id
+	$employee_where_clause
 	[template::list::filter_where_clauses -and -name tasks]
         [template::list::orderby_clause -orderby -name tasks]
     </querytext>

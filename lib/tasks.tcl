@@ -1,4 +1,32 @@
+# Usage:
+# <include
+#        src="/packages/tasks/lib/tasks"
+#        party_id="@party_id@"
+#        hide_form_p="t"
+#        page="@page@"
+#        tasks_orderby="@tasks_orderby@"
+#        page_flush_p="0"
+#        page_size="15" 
+#        show_filters_p="0" />
+#
+# page, page_flush and page_size   For pagination
+# order_by For the order_by clause
+# emp_f  Filter to specify if you are going to show the tasks of the organizations only (1) or
+#        or also the employess tasks (2), default to 2.
+# show_filters_p Boolean to specify if you want to show the filters menu or not. Default to 0
+
+
 set tasks_url "/tasks/"
+
+if { ![exists_and_not_null show_filters_p] } {
+    # Boolean to especify to show the filters or not
+    set show_filters_p 0
+}
+
+if { ![exists_and_not_null emp_f] } {
+    # Show tasks of the employees
+    set emp_f 2
+}
 
 # If we are not viewing the tasks of a party, view the tasks of the user
 if {![exists_and_not_null party_id]} {
@@ -45,6 +73,35 @@ if {[exists_and_not_null search_id]} {
 } else {
     set group_where_clause "and group_distinct_member_map.group_id = [contacts::default_group]"
 }
+
+set filters_list [list user_id [list where_clause "ao.creation_user = :user_id"] \
+		      search_id {} \
+		      query {} \
+		      page_size {} \
+		      tasks_interval {} \
+		      process_instance {}]
+
+# We are going to verify if the party_id is an organization
+# if it is, then we would retrieve the tasks also of the 
+# employees of the organization.
+
+set employee_where_clause "and t.party_id = :party_id"
+if { [apm_package_installed_p organizations] && [exists_and_not_null contact_id]} {
+    set org_p [organization::organization_p -party_id $contact_id]
+    if { $org_p } {
+        lappend filters_list emp_f {
+            label "[_ mail-tracking.Emails_to]"
+            values { {"[_ mail-tracking.Organization]" 1} { "[_ mail-tracking.Employees]" 2 }}
+        }
+    }
+
+    if { $org_p && [string equal $emp_f 2] } {
+        set emp_list [contact::util::get_employees -organization_id $contact_id]
+        lappend emp_list $contact_id
+        set employee_where_clause " and t.party_id in ([template::util::tcl_to_sql_list $emp_list])"
+    }
+}
+
 set done_url [export_vars -url -base "${tasks_url}contact" {orderby {status_id 2} {party_id $contact_id}}]
 set not_done_url [export_vars -url -base "${tasks_url}contact" {orderby {status_id 1} {party_id $contact_id}}]
 set return_url "[ad_conn url]?[ad_conn query]"
@@ -125,19 +182,8 @@ template::list::create \
     -sub_class {
         narrow
     } \
-    -filters {
-	party_id {
-	    where_clause {t.party_id = :party_id}
-	}
-	user_id {
-	    where_clause {ao.creation_user = :user_id}
-	}
-	search_id {}
-	query {}
-	page_size {}
-	tasks_interval {}
-	process_instance {}
-    } -orderby {
+    -filters $filters_list \
+    -orderby {
         default_value "priority,desc"
         date {
             label "[_ tasks.Due]"
