@@ -15,6 +15,11 @@
 #        or also the employess tasks (2), default to 2.
 # show_filters_p Boolean to specify if you want to show the filters menu or not. Default to 0
 
+foreach optional_param {party_id query search_id tasks_interval page page_size page_flush_p} {
+    if {![info exists $optional_param]} {
+	set $optional_param {}
+    }
+}
 
 set tasks_url "/tasks/"
 
@@ -107,7 +112,6 @@ set not_done_url [export_vars -url -base "${tasks_url}contact" {orderby {status_
 set return_url "[ad_conn url]?[ad_conn query]"
 set add_url [export_vars -base "${tasks_url}task" {return_url orderby status_id {party_id $contact_id}}]
 set bulk_actions [list "[_ tasks.Reassign]" "reassign-task" "[_ tasks.Reassign_selected]"]
-
 
 template::list::create \
     -name tasks \
