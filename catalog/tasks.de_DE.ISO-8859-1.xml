@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<message_catalog package_key="tasks" package_version="0.1d" locale="de_DE" charset="ISO-8859-1">
+<message_catalog package_key="tasks" package_version="0.1d4" locale="de_DE" charset="ISO-8859-1">
 
   <msg key="a_Task">eine Aufgabe</msg>
+  <msg key="Add_a_task_to_the">Eine Aufgabe für die ausgewählten Kontakte hinzufügen</msg>
   <msg key="Add_Task">Aufgabe hinzufügen</msg>
+  <msg key="Add_task_to">Einen Task hinzufügen für</msg>
   <msg key="AddEdit">Hinzufügen/Ändern</msg>
   <msg key="Assign_Process">Prozess zuweisen</msg>
   <msg key="Cancel">Abbrechen</msg>
   <msg key="Cancel_do_not_delete">Abbrechen, nicht löschen</msg>
+  <msg key="Comment">Kommentar</msg>
+  <msg key="completed_sure">Sind Sie sicher das sie %pretty_entries% als erledigt markieren wollen?</msg>
+  <msg key="Completed_Task">Fertig gestellte Aufgabe</msg>
+  <msg key="Contact">Kontakt</msg>
   <msg key="Created_By">Erstellt von</msg>
   <msg key="Custom_Task">Spezifische Aufgabe</msg>
   <msg key="Date">Datum</msg>
@@ -17,6 +23,8 @@
   <msg key="Follow_Up_Call">Follow Up Anruf</msg>
   <msg key="Follow_Up_Email">Follow Up e-Mail</msg>
   <msg key="Have_they_responded">Haben Sie geantwortet?</msg>
+  <msg key="if_blank_there_is_no">Wenn leer gibt es keine Fälligkeit</msg>
+  <msg key="Important">Wichtig</msg>
   <msg key="lt_Add_Task_and_Add_Anot">Eine Aufgabe und einen weitere hinzufügen </msg>
   <msg key="lt_Add_Task_save________">Aufgabe hinzufügen} save} {{&lt;#_ Add Task und eine weitere hinzufügen</msg>
   <msg key="lt_Are_you_sure_you_want">Sind Sie sich sicher, dass Sie diesen Prozess löschen wollen: %one_line% ?</msg>
@@ -35,14 +43,23 @@
   <msg key="lt_these_num_entries_tas">Diese %num_entries% Aufgaben</msg>
   <msg key="lt_Update_and_Add_New_Ta">Update und Anlegen neue Aufgabe</msg>
   <msg key="lt_You_are_not_allowed_t">Sie sind</msg>
+  <msg key="Mark_Completed">Als fertiggestellt markieren</msg>
+  <msg key="Mark_Done">%pretty_task% als fertiggestellt markieren</msg>
   <msg key="more">mehr</msg>
   <msg key="No_Cancel">Nein, Abbrechen</msg>
+  <msg key="Normal">Sehr wichtig</msg>
   <msg key="Not_Allowed">Nicht erlaubt</msg>
   <msg key="Not_Done">Nicht erledigt</msg>
+  <msg key="Not_Important">Gelegentlich</msg>
   <msg key="Notes">Notizen</msg>
   <msg key="Priority">Priorität</msg>
   <msg key="Process">Prozess</msg>
+  <msg key="Reassign">Anders zuweisen</msg>
+  <msg key="Reassign_selected">Ausgewählte Aufgaben anders zuweisen</msg>
+  <msg key="Reassign_Tasks">Aufgaben anders zuweisen</msg>
   <msg key="Select_process">Prozess wählen:</msg>
+  <msg key="Select_the_user">Wählen Sie den Benutzer aus der diese Aufgabe bekommen soll</msg>
+  <msg key="Select_the_user_to">Wählen Sie den Benutzer aus der diese Aufgabe bekommen soll. Wenn Sie es leer lassen dann wird die Aufgabe Ihnen zugewiesen.</msg>
   <msg key="Send_Birthday_Card">Geburtstagskarte schicken</msg>
   <msg key="Send_Class_Schedule">Stundenplan der Klasse versenden</msg>
   <msg key="Send_Letter">Brief schicken</msg>
@@ -50,8 +67,17 @@
   <msg key="Standard_Task">Standard Aufgabe</msg>
   <msg key="Status">Status</msg>
   <msg key="Task">Aufgabe</msg>
+  <msg key="task_completed">Die Aufgabe '%task_title%' wurde als fertig markiert</msg>
+  <msg key="task_delayed">Der Task &lt;a href=&quot;%task_url%&quot;&gt;%task%&lt;/a&gt; wurde um 7 Tage verzögert</msg>
+  <msg key="task_moved_up">Der Task &lt;a href=&quot;%task_url%&quot;&gt;%task%&lt;/a&gt; wurde um 7 Tage vorgezogen</msg>
   <msg key="Tasks">Aufgaben</msg>
+  <msg key="tasks_completed">Die Aufgaben %task_list% wurden als fertig markiert</msg>
+  <msg key="Tasks_Instance">Tasks Instanz %package_id%</msg>
+  <msg key="these_tasks">diese %num_entries% Aufgaben</msg>
   <msg key="this_task">Diese Aufgabe</msg>
   <msg key="Update">Aktualisierung</msg>
+  <msg key="Very_Important">Normal</msg>
+  <msg key="View_next">Die nächsten</msg>
   <msg key="Yes">Ja</msg>
+  <msg key="You_can_either_use">Sie können entwedern eine Standardaufgabe auswählen oder eine eigene definieren, aber nicht beides.</msg>
 </message_catalog>
