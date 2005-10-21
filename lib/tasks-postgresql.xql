@@ -126,7 +126,6 @@
         and t.start_date < now()
 	$employee_where_clause
 	[template::list::filter_where_clauses -and -name tasks]
-        [template::list::orderby_clause -orderby -name tasks]
     </querytext>
 </fullquery>
 

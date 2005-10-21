@@ -233,6 +233,8 @@ template::list::create \
 	}
     }
 
+
+
 db_multirow -extend {creation_user_url contact_url complete_url done_p task_plus_url task_minus_url description_html task_url} -unclobber tasks $query_name {} {
     set contact_url [contact::url -party_id $party_id]
     set creation_user_url [contact::url -party_id $creation_user]
