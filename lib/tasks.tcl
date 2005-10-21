@@ -84,6 +84,7 @@ set filters_list [list user_id [list where_clause "ao.creation_user = :user_id"]
 		      query {} \
 		      page_size {} \
 		      tasks_interval {} \
+		      party_id {} \
 		      process_instance {}]
 
 # We are going to verify if the party_id is an organization
@@ -95,8 +96,8 @@ if { [apm_package_installed_p organizations] && [exists_and_not_null contact_id]
     set org_p [organization::organization_p -party_id $contact_id]
     if { $org_p } {
         lappend filters_list emp_f {
-            label "[_ mail-tracking.Emails_to]"
-            values { {"[_ mail-tracking.Organization]" 1} { "[_ mail-tracking.Employees]" 2 }}
+            label "[_ tasks.Tasks_Assigned_to]"
+            values { {"[_ tasks.Organization]" 1} { "[_ tasks.Employees]" 2 }}
         }
     }
 
