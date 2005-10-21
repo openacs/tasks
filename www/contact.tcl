@@ -14,13 +14,14 @@ ad_page_contract {
     still allow people to view everyone.
 
 } {
-    {orderby ""}
+    {tasks_orderby ""}
     {page:optional "1"}
     {page_size:optional "25"}
     {party_id ""}
     {searchterm ""}
     {mine_p "t"}
     {status_id "1"}
+    {tasks_interval "30"}
     {process_instance:integer,optional}
 } -properties {
     task_term:onevalue
