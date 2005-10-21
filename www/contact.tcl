@@ -22,6 +22,7 @@ ad_page_contract {
     {mine_p "t"}
     {status_id "1"}
     {tasks_interval "30"}
+    {emp_f ""}
     {process_instance:integer,optional}
 } -properties {
     task_term:onevalue

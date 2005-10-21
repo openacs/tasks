@@ -13,6 +13,7 @@
                  search_id=""
                  row_list="@row_list@"
 		 show_filters_p="t"
+		 emp_f="@emp_f@"
 		 tasks_interval="@tasks_interval@"
                  query=""/>
     </td>
