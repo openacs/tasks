@@ -20,6 +20,7 @@
   <msg key="Delete_task_pretty">Delete %task_pretty%</msg>
   <msg key="Done">Done</msg>
   <msg key="Due">Due</msg>
+  <msg key="Employees">Employees</msg>
   <msg key="Follow_Up_Call">Follow Up Call</msg>
   <msg key="Follow_Up_Email">Follow Up Email</msg>
   <msg key="Have_they_responded">Have they responded?</msg>
@@ -53,6 +54,7 @@
   <msg key="Not_Done">Not Done</msg>
   <msg key="Not_Important">Not Important</msg>
   <msg key="Notes">Notes</msg>
+  <msg key="Organization">Organization</msg>
   <msg key="Priority">Priority</msg>
   <msg key="Process">Process</msg>
   <msg key="Reassign">Reassign</msg>
@@ -72,6 +74,7 @@
   <msg key="task_delayed">The task &lt;a href=&quot;%task_url%&quot;&gt;%task%&lt;/a&gt; delayed 7 days</msg>
   <msg key="task_moved_up">The task &lt;a href=&quot;%task_url%&quot;&gt;%task%&lt;/a&gt; moved up 7 days</msg>
   <msg key="Tasks">Tasks</msg>
+  <msg key="Tasks_Assigned_to">Tasks Assigned to</msg>
   <msg key="tasks_completed">The tasks %task_list% were marked done</msg>
   <msg key="Tasks_Instance">Tasks Instance %package_id%</msg>
   <msg key="these_tasks">these %num_entries% tasks</msg>
