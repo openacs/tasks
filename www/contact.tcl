@@ -24,6 +24,10 @@ ad_page_contract {
     {tasks_interval "30"}
     {emp_f ""}
     {process_instance:integer,optional}
+    {cgl_orderby ""}
+    {tasks_orderby ""}
+    {page "1"}
+    {emp_f ""}
 } -properties {
     task_term:onevalue
     context:onevalue

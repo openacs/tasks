@@ -2,7 +2,7 @@
 <p><formtemplate id="search" style="proper-inline"></formtemplate></p>
 
 <br />
-<table width="65%">
+<table width="100%">
 <tr>
     <td>
 	<include src="/packages/tasks/lib/tasks-portlet"
