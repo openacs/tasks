@@ -2,26 +2,42 @@
 # <include
 #        src="/packages/tasks/lib/tasks"
 #        party_id="@party_id@"
+#        elements="deleted_p priority title process_title contact_name date creation_user contact_name"
 #        hide_form_p="t"
 #        page="@page@"
 #        tasks_orderby="@tasks_orderby@"
 #        page_flush_p="0"
-#        page_size="15" 
+#        page_size="15"
+#        format="@format@"
 #        show_filters_p="0" />
 #
-# page, page_flush and page_size   For pagination
-# order_by For the order_by clause
-# emp_f  Filter to specify if you are going to show the tasks of the organizations only (1) or
-#        or also the employess tasks (2), default to 2.
+# elements       The name of the elements to display in the list.
+# page           For pagination
+# page_flush     For pagination
+# page_size      How many rows are we going to show
+# order_by       For the order_by clause
+# format         The display format of the list. Normal
+# emp_f          Filter to specify if you are going to show the tasks of the organizations only (1) or
+#                or also the employess tasks (2), default to 2.
 # show_filters_p Boolean to specify if you want to show the filters menu or not. Default to 0
 
-foreach optional_param {party_id query search_id tasks_interval page page_size page_flush_p} {
+foreach optional_param {party_id query search_id tasks_interval page page_size page_flush_p elements} {
     if {![info exists $optional_param]} {
 	set $optional_param {}
     }
 }
 
 set tasks_url "/tasks/"
+
+set row_list [list]
+foreach element $elements {
+    lappend row_list $element
+    lappend row_list {}
+}
+
+if { ![exists_and_not_null format] } {
+    set format "normal"
+}
 
 if { ![exists_and_not_null show_filters_p] } {
     # Boolean to especify to show the filters or not
@@ -70,9 +86,7 @@ if { ![exists_and_not_null status_id] } {
 if { ![exists_and_not_null package_id] } {
     set package_id [ad_conn package_id]
 }
-if { ![exists_and_not_null row_list] } {
-    set row_list {checkbox {} deleted_p {} priority {} title {} process_title {} contact_name {} date {} creation_user {}}
-}
+
 if {[exists_and_not_null search_id]} {
     set group_where_clause ""
 } else {
@@ -120,7 +134,7 @@ template::list::create \
     -bulk_actions $bulk_actions \
     -bulk_action_method post \
     -bulk_action_export_vars { } \
-    -selected_format normal \
+    -selected_format $format \
     -key task_id \
     -orderby_name tasks_orderby \
     -page_size $page_size \
@@ -233,8 +247,6 @@ template::list::create \
 	    row $row_list
 	}
     }
-
-
 
 db_multirow -extend {creation_user_url contact_url complete_url done_p task_plus_url task_minus_url description_html task_url} -unclobber tasks $query_name {} {
     set contact_url [contact::url -party_id $party_id]
