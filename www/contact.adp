@@ -10,7 +10,7 @@
 		 page="@page@"
 		 page_size="@page_size@"
                  search_id=""
-                 row_list="@row_list@"
+                 elements="@elements@"
                  page_flush_p="0"
 		 show_filters_p="t"
 		 emp_f="@emp_f@"

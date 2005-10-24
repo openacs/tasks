@@ -27,7 +27,6 @@ ad_page_contract {
     {cgl_orderby ""}
     {tasks_orderby ""}
     {page "1"}
-    {emp_f ""}
 } -properties {
     task_term:onevalue
     context:onevalue
@@ -38,5 +37,9 @@ ad_page_contract {
 set user_id [ad_conn user_id]
 set package_id [ad_conn package_id]
 set admin_p [permission::permission_p -object_id $package_id -privilege admin]
-set context {}
-set row_list {checkbox {} deleted_p {} priority {} title {} process_title {} date {} creation_user {}}
+set context [list]
+set elements "checkbox deleted_p priority title process_title date creation_user"
+
+if { [string equal $emp_f "2"]} {
+    lappend elements contact_name
+}
