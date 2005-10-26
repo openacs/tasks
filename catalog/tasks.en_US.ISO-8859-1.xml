@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<message_catalog package_key="tasks" package_version="0.1d4" locale="en_US" charset="ISO-8859-1">
+<message_catalog package_key="tasks" package_version="0.1d6" locale="en_US" charset="ISO-8859-1">
 
   <msg key="a_Task">a Task</msg>
   <msg key="Add_a_task_to_the">Add a task to the selected contacts</msg>
@@ -9,6 +9,7 @@
   <msg key="Assign_Process">Assign Process</msg>
   <msg key="Cancel">Cancel</msg>
   <msg key="Cancel_do_not_delete">Cancel, do not delete</msg>
+  <msg key="Change_Assignee">Change Assignee</msg>
   <msg key="Comment">Comment</msg>
   <msg key="completed_sure">Are you sure you want to mark %pretty_entries% as done?</msg>
   <msg key="Completed_Task">Completed Task</msg>
@@ -60,6 +61,8 @@
   <msg key="Reassign">Reassign</msg>
   <msg key="Reassign_selected">Reassign Selected Tasks</msg>
   <msg key="Reassign_Tasks">Reassign Tasks</msg>
+  <msg key="Search_Assignee">Search Assignee</msg>
+  <msg key="Search_Assignee_help">Search for a name to set as the assignee of the tasks.</msg>
   <msg key="Select_process">Select process:</msg>
   <msg key="Select_the_user">Select the user to assign the tasks.</msg>
   <msg key="Select_the_user_to">Select the user to assign the task. If &quot;blank&quot; then the task will be assigned to yourself.</msg>

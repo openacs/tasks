@@ -131,6 +131,7 @@ ad_proc -public tasks::task::new {
     {-due_date ""}
     {-package_id ""}
     {-context_id ""}
+    {-assignee_id ""}
 } {
     if { [empty_string_p $package_id] } {
         set package_id [apm_package_id_from_key "tasks"]
@@ -141,7 +142,7 @@ ad_proc -public tasks::task::new {
 	set context_id $package_id
     }
 
-    oacs_util::vars_to_ns_set -ns_set $extra_vars -var_list {task_id process_instance_id process_task_id party_id object_id title description mime_type comment status_id priority start_date due_date package_id context_id}
+    oacs_util::vars_to_ns_set -ns_set $extra_vars -var_list {task_id process_instance_id process_task_id party_id object_id title description mime_type comment status_id priority start_date due_date package_id context_id assignee_id}
 
     set task_id [package_instantiate_object -extra_vars $extra_vars tasks_task]
 
@@ -157,6 +158,7 @@ ad_proc -public tasks::task::edit {
     {-status_id 1}
     {-priority 0}
     {-due_date ""}
+    {-assignee_id ""}
 } {
     set modifying_user [ad_conn user_id]
     set modifying_ip [ad_conn peeraddr]
@@ -194,6 +196,7 @@ ad_proc -public tasks::process::task::new {
     {-start 0}
     {-due 0}
     {-package_id ""}
+    {-assignee_id ""}
 } {
     if { [empty_string_p $package_id] } {
         set package_id [ad_conn package_id]
@@ -201,7 +204,7 @@ ad_proc -public tasks::process::task::new {
     set extra_vars [ns_set create]
     set context_id $package_id
 
-    oacs_util::vars_to_ns_set -ns_set $extra_vars -var_list {task_id process_id open_action_id closing_action_id party_id object_id title description mime_type comment status_id priority start due package_id context_id}
+    oacs_util::vars_to_ns_set -ns_set $extra_vars -var_list {task_id process_id open_action_id closing_action_id party_id object_id title description mime_type comment status_id priority start due package_id context_id assignee_id}
 
     set task_id [package_instantiate_object -extra_vars $extra_vars tasks_process_task]
 
@@ -221,6 +224,7 @@ ad_proc -public tasks::process::task::edit {
     {-priority 0}
     {-start 0}
     {-due 0}
+    {-assignee_id ""}
 } {
     set modifying_user [ad_conn user_id]
     set modifying_ip [ad_conn peeraddr]

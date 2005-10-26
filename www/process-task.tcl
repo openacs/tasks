@@ -179,7 +179,8 @@ ad_form -name add_edit \
 				     -status_id $status \
 				     -priority $priority \
 				     -start $start \
-				     -due $due]
+				     -due $due \
+				     -assignee_id $assignee_id]
 
 	    util_user_message -html -message "The process task <a href=\"${process_task_url}\">$task</a> was added"
 	}
@@ -197,7 +198,8 @@ ad_form -name add_edit \
 	-status_id $status \
 	-priority $priority \
 	-start $start \
-	-due $due
+	-due $due \
+	-assignee_id $assignee_id
 
     util_user_message -html -message "The process task <a href=\"${process_task_url}\">$task</a> was updated"
 

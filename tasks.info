@@ -7,14 +7,14 @@
     <initial-install-p>f</initial-install-p>
     <singleton-p>f</singleton-p>
     
-    <version name="0.1d5" url="http://openacs.org/repository/download/apm/tasks-0.1d5.apm">
+    <version name="0.1d6" url="http://openacs.org/repository/download/apm/tasks-0.1d6.apm">
         <owner url="mailto:openacs@geddert.com">Matthew Geddert</owner>
         <summary>Keep track of tasks to do.</summary>
-        <release-date>2005-10-21</release-date>
+        <release-date>2005-10-26</release-date>
         <description format="text/html">This package uses project manager tcl and sql as the base for a simple task program without project manager's complexity.</description>
         <maturity>0</maturity>
 
-        <provides url="tasks" version="0.1d5"/>
+        <provides url="tasks" version="0.1d6"/>
         <requires url="project-manager" version="2.70a1"/>
         <requires url="workflow" version="2.0.0b4"/>
 

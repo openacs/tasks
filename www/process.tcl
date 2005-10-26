@@ -95,7 +95,7 @@ template::list::create \
         }
     } \
     -bulk_actions {
-        "Delete" "process-task-delete" "Delete tasks"
+        "Delete" "process-task-delete" "Delete tasks" "#tasks.Change_Assignee#" change-assignee "#tasks.Change_Assignee#"
     } \
     -bulk_action_export_vars {
         process_id

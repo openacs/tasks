@@ -10,7 +10,7 @@ ad_page_contract {
     @return title Page title.
 } {
     process_id:integer,optional
-    assignee_id:integer,optional
+    {assignee_id:integer,optional ""}
 } -properties {
     context_bar:onevalue
     title:onevalue
@@ -85,7 +85,9 @@ ad_form -name add_edit -form {
 	-process_id $process_id \
 	-title $title \
 	-description $description \
-	-mime_type "text/plain"
+	-mime_type "text/plain" \
+	-assignee_id $assignee_id\
+	
 
 } -after_submit {
 

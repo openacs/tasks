@@ -93,7 +93,8 @@ create table t_process_tasks (
         -- start date relative to current date
         start                   numeric,
         -- due date relative to current date
-        due                     numeric
+        due                     numeric,
+	assignee_id             integer
 );
 
 
@@ -133,7 +134,8 @@ create table t_tasks (
         priority                integer,
         start_date              timestamptz,
         due_date                timestamptz,
-        completed_date          timestamptz
+        completed_date          timestamptz,
+	assignee_id             integer
 );
 
 
@@ -313,9 +315,9 @@ end;' language 'plpgsql';
 
 -----------------------------
 
-select define_function_args('tasks_task__new','task_id,process_instance_id,process_task_id,party_id,object_id,title,description,mime_type,comment,status_id,priority,start_date,due_date,package_id,creation_user,creation_ip,context_id');
+select define_function_args('tasks_task__new','task_id,process_instance_id,process_task_id,party_id,object_id,title,description,mime_type,comment,status_id,priority,start_date,due_date,package_id,creation_user,creation_ip,context_id,assignee_id');
 
-create or replace function tasks_task__new (integer,integer,integer,integer,integer,varchar,text,varchar,text,integer,integer,timestamptz,timestamptz,integer,integer,varchar,integer)
+create or replace function tasks_task__new (integer,integer,integer,integer,integer,varchar,text,varchar,text,integer,integer,timestamptz,timestamptz,integer,integer,varchar,integer,integer)
 returns integer as '
 declare
     p_task_id                 alias for $1;
@@ -335,6 +337,7 @@ declare
     p_creation_user           alias for $15;
     p_creation_ip             alias for $16;
     p_context_id              alias for $17;
+    p_assignee_id             alias for $18;
     v_task_id                 integer;
     v_start_date              timestamptz;
 begin
@@ -359,20 +362,20 @@ begin
     insert into t_tasks
     (task_id, process_instance_id, process_task_id, party_id, object_id,
      title, description, mime_type, comment, status_id, priority,
-     start_date, due_date)
+     start_date, due_date, assignee_id)
     values
     (v_task_id, p_process_instance_id, p_process_task_id, p_party_id,
      p_object_id, p_title, p_description, p_mime_type, p_comment,
-     p_status_id, p_priority, v_start_date, p_due_date);
+     p_status_id, p_priority, v_start_date, p_due_date, p_assignee_id);
 
     return v_task_id;
 end;
 ' language 'plpgsql';
 
 
-select define_function_args('tasks_process_task__new','task_id,process_id,open_action_id,closing_action_id,party_id,object_id,title,description,mime_type,comment,status_id,priority,start,due,package_id,creation_user,creation_ip,context_id');
+select define_function_args('tasks_process_task__new','task_id,process_id,open_action_id,closing_action_id,party_id,object_id,title,description,mime_type,comment,status_id,priority,start,due,package_id,creation_user,creation_ip,context_id,assignee_id');
 
-create or replace function tasks_process_task__new (integer,integer,integer,integer,integer,integer,varchar,text,varchar,text,integer,integer,numeric,numeric,integer,integer,varchar,integer)
+create or replace function tasks_process_task__new (integer,integer,integer,integer,integer,integer,varchar,text,varchar,text,integer,integer,numeric,numeric,integer,integer,varchar,integer,integer)
 returns integer as '
 declare
     p_task_id                 alias for $1;
@@ -393,6 +396,7 @@ declare
     p_creation_user           alias for $16;
     p_creation_ip             alias for $17;
     p_context_id              alias for $18;
+    p_assignee_id             alias for $19;
     v_task_id                 integer;
 begin
     v_task_id:= acs_object__new(
@@ -410,11 +414,11 @@ begin
     insert into t_process_tasks
     (task_id, process_id, open_action_id, closing_action_id, party_id,
      object_id, title, description, mime_type, comment, status_id,
-     priority, start, due)
+     priority, start, due, assignee_id)
     values
     (v_task_id, p_process_id, p_open_action_id, p_closing_action_id,
      p_party_id, p_object_id, p_title, p_description, p_mime_type,
-     p_comment, p_status_id, p_priority, p_start, p_due);
+     p_comment, p_status_id, p_priority, p_start, p_due, p_assignee_id);
 
     return v_task_id;
 end;

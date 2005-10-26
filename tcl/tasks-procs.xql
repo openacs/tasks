@@ -34,7 +34,8 @@
             comment = :comment,
             status_id = :status_id,
             priority = :priority,
-            due_date = :due_date
+            due_date = :due_date,
+	    assignee_id = :assignee_id
 	where task_id = :task_id
 
          </querytext>
@@ -66,7 +67,8 @@
             status_id = :status_id,
             priority = :priority,
 	    start = :start,
-            due = :due
+            due = :due,
+	    assignee_id = :assignee_id
 	where task_id = :task_id
 
          </querytext>
