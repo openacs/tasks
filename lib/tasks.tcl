@@ -2,7 +2,7 @@
 # <include
 #        src="/packages/tasks/lib/tasks"
 #        party_id="@party_id@"
-#        elements="deleted_p priority title process_title contact_name date creation_user contact_name"
+#        elements="deleted_p priority title process_title contact_name date assignee contact_name"
 #        hide_form_p="t"
 #        page="@page@"
 #        tasks_orderby="@tasks_orderby@"
@@ -93,7 +93,7 @@ if {[exists_and_not_null search_id]} {
     set group_where_clause "and group_distinct_member_map.group_id = [contacts::default_group]"
 }
 
-set filters_list [list user_id [list where_clause "ao.creation_user = :user_id"] \
+set filters_list [list user_id [list where_clause "t.assignee_id = :user_id"] \
 		      search_id {} \
 		      query {} \
 		      page_size {} \
@@ -192,10 +192,10 @@ template::list::create \
                 </else>
 	    }
 	}
-	creation_user {
-	    label "[_ tasks.Created_By]"
+	assignee {
+	    label "[_ tasks.Assignee]"
 	    display_template {
-		<a href="@tasks.creation_user_url@"<if @tasks.done_p@> class="done"</if>>@tasks.creation_name@</a>
+		<a href="@tasks.assignee_url@"<if @tasks.done_p@> class="done"</if>>@tasks.assignee_name@</a>
 	    }
 	}      
     } \
@@ -235,10 +235,10 @@ template::list::create \
             orderby_asc "lower(contact__name(t.party_id)) asc, t.due_date asc, t.priority, lower(t.title)"
 	    default_direction asc
 	}
-	creation_user {
-	    label "[_ tasks.Created_By]"
-            orderby_desc "lower(contact__name(ao.creation_user)) desc, t.due_date asc, t.priority, lower(t.title)"
-            orderby_asc "lower(contact__name(ao.creation_user)) asc, t.due_date asc, t.priority, lower(t.title)"
+	assignee {
+	    label "[_ tasks.Assiggnee]"
+            orderby_desc "lower(contact__name(t.assignee_id)) desc, t.due_date asc, t.priority, lower(t.title)"
+            orderby_asc "lower(contact__name(.assignee_id)) asc, t.due_date asc, t.priority, lower(t.title)"
 	    default_direction asc
 	}
     } -formats {
@@ -249,10 +249,10 @@ template::list::create \
 	}
     }
 
-db_multirow -extend {creation_user_url contact_url complete_url done_p task_plus_url task_minus_url description_html task_url} -unclobber tasks $query_name {} {
+db_multirow -extend {assignee_url contact_url complete_url done_p task_plus_url task_minus_url description_html task_url} -unclobber tasks $query_name {} {
     set contact_url [contact::url -party_id $party_id]
-    set creation_user_url [contact::url -party_id $creation_user]
-    regsub -all "/tasks/" $creation_user_url "/contacts/" creation_user_url
+    set assignee_url [contact::url -party_id $assignee_id]
+    regsub -all "/tasks/" $assignee_url "/contacts/" assignee_url
     set complete_url [export_vars -base "${tasks_url}mark-completed" -url {task_id orderby {party_id $contact_id} return_url}]
     if { $status_id == "2" } {
 	set done_p 1

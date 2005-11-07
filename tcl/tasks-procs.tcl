@@ -142,6 +142,10 @@ ad_proc -public tasks::task::new {
 	set context_id $package_id
     }
 
+    if { [empty_string_p $assignee_id] } {
+	set assignee_id [ad_conn user_id]
+    }
+
     oacs_util::vars_to_ns_set -ns_set $extra_vars -var_list {task_id process_instance_id process_task_id party_id object_id title description mime_type comment status_id priority start_date due_date package_id context_id assignee_id}
 
     set task_id [package_instantiate_object -extra_vars $extra_vars tasks_task]
@@ -201,6 +205,11 @@ ad_proc -public tasks::process::task::new {
     if { [empty_string_p $package_id] } {
         set package_id [ad_conn package_id]
     }
+
+    if { [empty_string_p $assignee_id] } {
+	set assignee_id [ad_conn user_id]
+    }
+
     set extra_vars [ns_set create]
     set context_id $package_id
 

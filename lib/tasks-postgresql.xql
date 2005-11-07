@@ -14,10 +14,10 @@
 		p.process_id,
            	tasks__relative_date(t.due_date) as due_date,
            	tasks__relative_date(t.completed_date) as completed_date,
-           	ao.creation_user, 
 		t.status_id, 
 		t.process_instance_id,
-           	contact__name(ao.creation_user) as creation_name,
+		t.assignee_id,
+           	contact__name(t.assignee_id) as assignee_name,
                 contact__name(t.party_id) as contact_name,
            	CASE WHEN t.due_date < now() THEN 't' ELSE 'f' END as due_date_passed_p,
            	s.title as status, 
@@ -36,7 +36,7 @@
         and ao.package_id = :package_id
       	and t.start_date < now()
         and t.due_date < ( now() + '$tasks_interval days'::interval )
-	and ao.creation_user = :user_id
+	and t.assignee_id = :user_id
         and t.party_id in ( select parties.party_id
                             from parties
                             left join cr_items on (parties.party_id = cr_items.item_id)
@@ -61,7 +61,7 @@
         and ao.package_id = :package_id
         and t.start_date < now()
         and t.due_date < ( now() + '$tasks_interval days'::interval )
-	and ao.creation_user = :user_id
+	and t.assignee_id = :user_id
         and t.party_id in ( select parties.party_id
                             from parties
                             left join cr_items on (parties.party_id = cr_items.item_id)
@@ -87,10 +87,10 @@
 		p.process_id,
            	tasks__relative_date(t.due_date) as due_date,
            	tasks__relative_date(t.completed_date) as completed_date,
-           	ao.creation_user, 
 		t.status_id, 
 		t.process_instance_id,
-           	contact__name(ao.creation_user) as creation_name,
+		t.assignee_id,	
+           	contact__name(t.assignee_id) as assignee_name,
                 contact__name(t.party_id) as contact_name,
            	CASE WHEN t.due_date < now() THEN 't' ELSE 'f' END as due_date_passed_p,
            	s.title as status, 
