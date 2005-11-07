@@ -169,7 +169,7 @@ ad_form -extend -name add_edit \
         {comment:text(textarea),optional,nospell
             {label "[_ tasks.Comment]"}
             {html { rows 6 cols 60 wrap soft}}}
-
+	{assignee_id:text(hidden)}
     } -new_request {
 
         set title "[_ tasks.Add_Task]"
@@ -245,7 +245,8 @@ ad_form -extend -name add_edit \
 			 -comment ${comment} \
 			 -due_date ${due_date} \
 			 -status_id ${status} \
-			 -priority ${priority}]
+			 -priority ${priority} \
+			 -assignee_id ${assignee_id}]
 
     	set task_url [export_vars -base task -url {task_id status_id orderby party_id}]
 	util_user_message -html -message "[_ tasks.lt_The_task_a_hreftaskst_1]"

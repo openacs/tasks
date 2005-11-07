@@ -41,7 +41,7 @@
 		t.description, 
 		t.comment,
                 to_char(t.due_date,'YYYY-MM-DD') as due_date,
-                t.priority, t.status_id as status, t.object_id
+                t.priority, t.status_id as status, t.object_id, t.assignee_id
    	from 
 		t_tasks t
       	where 
