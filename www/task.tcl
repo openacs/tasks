@@ -17,6 +17,7 @@ ad_page_contract {
     orderby:optional
     {return_url ""}
     {assign_party_id ""}
+    {assignee_id ""}
 } -properties {
 }
 
@@ -169,7 +170,9 @@ ad_form -extend -name add_edit \
         {comment:text(textarea),optional,nospell
             {label "[_ tasks.Comment]"}
             {html { rows 6 cols 60 wrap soft}}}
-	{assignee_id:text(hidden)}
+	{assignee_id:text(hidden)
+	    {value $assignee_id}
+	}
     } -new_request {
 
         set title "[_ tasks.Add_Task]"
