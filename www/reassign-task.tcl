@@ -28,10 +28,6 @@ if { [exists_and_not_null task_id] } {
     set show_tasks [join $show_tasks ", "]
 }
 
-# We get allt the posible users to reassign
-# to use in the options of the select
-set reassign_parties [db_list_of_lists get_all_users { }]
-
 ad_form -name "reassign" -form {
     {task_id:text(hidden)
 	{value $task_id}
@@ -44,9 +40,8 @@ ad_form -name "reassign" -form {
 	{value  $show_tasks}
 	{mode display}
     }
-    {reassign_party:text(search)
+    {reassign_party:party_search(party_search)
 	{label "[_ tasks.Reassign]:"}
-	{options { $reassign_parties}}
 	{help_text "[_ tasks.Select_the_user]"}
     }
 } -on_submit {
