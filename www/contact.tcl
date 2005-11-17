@@ -38,7 +38,7 @@ set user_id [ad_conn user_id]
 set package_id [ad_conn package_id]
 set admin_p [permission::permission_p -object_id $package_id -privilege admin]
 set context [list]
-set elements "checkbox deleted_p priority title process_title date creation_user"
+set elements "checkbox deleted_p priority title process_title date assignee"
 
 if { [string equal $emp_f "2"]} {
     lappend elements contact_name
