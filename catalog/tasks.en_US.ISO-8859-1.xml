@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<message_catalog package_key="tasks" package_version="0.1d5" locale="en_US" charset="ISO-8859-1">
+
+  <msg key="a_Task">a Task</msg>
+  <msg key="Add_a_task_to_the">Add a task to the selected contacts</msg>
+  <msg key="Add_Task">Add Task</msg>
+  <msg key="Add_task_to">Add Task To</msg>
+  <msg key="AddEdit">Add/Edit</msg>
+  <msg key="Assign_Process">Assign Process</msg>
+  <msg key="Assignee">Assignee</msg>
+  <msg key="Cancel">Cancel</msg>
+  <msg key="Cancel_do_not_delete">Cancel, do not delete</msg>
+  <msg key="Change_Assignee">Change Assignee</msg>
+  <msg key="Comment">Comment</msg>
+  <msg key="completed_sure">Are you sure you want to mark %pretty_entries% as done?</msg>
+  <msg key="Completed_Task">Completed Task</msg>
+  <msg key="Contact">Contact</msg>
+  <msg key="Created_By">Created By</msg>
+  <msg key="Custom_Task">Custom Task</msg>
+  <msg key="Date">Date</msg>
+  <msg key="Delete">Delete</msg>
+  <msg key="Delete_task_pretty">Delete %task_pretty%</msg>
+  <msg key="Done">Done</msg>
+  <msg key="Due">Due</msg>
+  <msg key="Employees">Employees</msg>
+  <msg key="Follow_Up_Call">Follow Up Call</msg>
+  <msg key="Follow_Up_Email">Follow Up Email</msg>
+  <msg key="Have_they_responded">Have they responded?</msg>
+  <msg key="if_blank_there_is_no">If blank there is no due date</msg>
+  <msg key="Important">Important</msg>
+  <msg key="lt_Add_Task_and_Add_Anot">Add Task and Add Another</msg>
+  <msg key="lt_Add_Task_save________">Add Task} save}
+        {{&lt;#_ Add Task and Add Another</msg>
+  <msg key="lt_Are_you_sure_you_want">Are you sure you want to delete this process: %one_line%</msg>
+  <msg key="lt_Are_you_sure_you_want_1">Are you sure you want to delete %task2_pretty% ?</msg>
+  <msg key="lt_Delete_from_Recruitin">Delete from Recruiting System</msg>
+  <msg key="lt_Either_a_custom_task_">Either a custom task or standard task is required</msg>
+  <msg key="lt_Originally_created_by">Originally created by &lt;a href=\&quot;%creator_url%\&quot;&gt;%creator_name%&lt;/a&gt;</msg>
+  <msg key="lt_Provide_Promotional_I">Provide Promotional Information</msg>
+  <msg key="lt_Send_Personal_NoteLet">Send Personal Note/Letter</msg>
+  <msg key="lt_Standard_tasks_are_ca">Standard tasks are cannot be used in conjunction with custom tasks</msg>
+  <msg key="lt_The_task_a_hreftaskst">The task &lt;a href=&quot;/tasks/%task_url%&quot;&gt;%task%&lt;/a&gt; was added</msg>
+  <msg key="lt_The_task_a_hreftaskst_1">The task &lt;a href=&quot;/tasks/%task_url%&quot;&gt;%title%&lt;/a&gt; was updated</msg>
+  <msg key="lt_The_task_task_was_add">The task &quot;%task%&quot; was added to %names%</msg>
+  <msg key="lt_The_task_was">The task &quot;%task_title%&quot; was deleted</msg>
+  <msg key="lt_The_tasks_task_list_w">The tasks %task_list% were deleted</msg>
+  <msg key="lt_these_num_entries_tas">these %num_entries% tasks</msg>
+  <msg key="lt_Update_and_Add_New_Ta">Update and Add New Task</msg>
+  <msg key="lt_You_are_not_allowed_t">You are not allowed to bulk edit a task for multiple contacts</msg>
+  <msg key="Mark_Completed">Mark Completed</msg>
+  <msg key="Mark_Done">Mark %pretty_task% as Done</msg>
+  <msg key="more">more</msg>
+  <msg key="No_Cancel">No, Cancel</msg>
+  <msg key="Normal">Normal</msg>
+  <msg key="Not_Allowed">Not Allowed</msg>
+  <msg key="Not_Done">Not Done</msg>
+  <msg key="Not_Important">Not Important</msg>
+  <msg key="Notes">Notes</msg>
+  <msg key="Organization">Organization</msg>
+  <msg key="Priority">Priority</msg>
+  <msg key="Process">Process</msg>
+  <msg key="Reassign">Reassign</msg>
+  <msg key="Reassign_selected">Reassign Selected Tasks</msg>
+  <msg key="Reassign_Tasks">Reassign Tasks</msg>
+  <msg key="Search_Assignee">Search Assignee</msg>
+  <msg key="Search_Assignee_help">Search a keyword for new Assignee.</msg>
+  <msg key="Select_process">Select process:</msg>
+  <msg key="Select_the_user">Select the user to assign the tasks.</msg>
+  <msg key="Select_the_user_to">Select the user to assign the task. If &quot;blank&quot; then the task will be assigned to yourself.</msg>
+  <msg key="Send_Birthday_Card">Send Birthday Card</msg>
+  <msg key="Send_Class_Schedule">Send Class Schedule</msg>
+  <msg key="Send_Letter">Send Letter</msg>
+  <msg key="Send_Web_Info_Card">Send Web Info Card</msg>
+  <msg key="Standard_Task">Standard Task</msg>
+  <msg key="Status">Status</msg>
+  <msg key="Task">Task</msg>
+  <msg key="task_completed">The task &quot;%task_title%&quot; was marked done</msg>
+  <msg key="task_delayed">The task &lt;a href=&quot;%task_url%&quot;&gt;%task%&lt;/a&gt; delayed 7 days</msg>
+  <msg key="task_moved_up">The task &lt;a href=&quot;%task_url%&quot;&gt;%task%&lt;/a&gt; moved up 7 days</msg>
+  <msg key="Tasks">Tasks</msg>
+  <msg key="Tasks_Assigned_to">Tasks Assigned to</msg>
+  <msg key="tasks_completed">The tasks %task_list% were marked done</msg>
+  <msg key="Tasks_Instance">Tasks Instance %package_id%</msg>
+  <msg key="these_tasks">these %num_entries% tasks</msg>
+  <msg key="this_task">this task</msg>
+  <msg key="Update">Update</msg>
+  <msg key="Very_Important">Very Important</msg>
+  <msg key="View_next">View next</msg>
+  <msg key="Yes">Yes</msg>
+  <msg key="You_can_either_use">You can either use a standard task or a custom task, but not both</msg>
+</message_catalog>
