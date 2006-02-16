@@ -7,5 +7,4 @@
 <master>
 <property name="party_id">@party_id@</property>
 </else>
-
 <formtemplate id="add_edit"></formtemplate>

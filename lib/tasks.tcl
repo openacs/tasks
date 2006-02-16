@@ -237,7 +237,7 @@ template::list::create \
 	    default_direction asc
 	}
 	assignee {
-	    label "[_ tasks.Assiggnee]"
+	    label "[_ tasks.Assignee]"
             orderby_desc "lower(contact__name(t.assignee_id)) desc, t.due_date asc, t.priority, lower(t.title)"
             orderby_asc "lower(contact__name(.assignee_id)) asc, t.due_date asc, t.priority, lower(t.title)"
 	    default_direction asc

@@ -118,6 +118,12 @@ if {[exists_and_not_null party_id] && $party_id != $user_id} {
     }
 }
 
+set params [split [parameter::get -parameter DefaultTasks -default ""] ";"] 
+set opts [list [list "" ""]]
+foreach param $params {
+    lappend opts [list [_ $param] [_ $param]]
+}
+
 ad_form -extend -name add_edit \
     -cancel_url $return_url \
     -cancel_label "[_ tasks.Cancel]" \
@@ -125,19 +131,7 @@ ad_form -extend -name add_edit \
     -form {
         {task_prescribed:text(select),optional
             {label "[_ tasks.Standard_Task]"}
-	    {options {
-		{{}                                {}}             
-		{{[_ tasks.lt_Delete_from_Recruitin]}   {[_ tasks.lt_Delete_from_Recruitin]}}	 
-		{{[_ tasks.Follow_Up_Call]}		   {[_ tasks.Follow_Up_Call]}}		 	
-		{{[_ tasks.Follow_Up_Email]}		   {[_ tasks.Follow_Up_Email]}}		 
-		{{[_ tasks.Have_they_responded]}		   {[_ tasks.Have_they_responded]}}		 
-		{{[_ tasks.lt_Provide_Promotional_I]} {[_ tasks.lt_Provide_Promotional_I]}}
-		{{[_ tasks.Send_Letter]}			   {[_ tasks.Send_Letter]}}			 
-		{{[_ tasks.Send_Birthday_Card]}		   {[_ tasks.Send_Birthday_Card]}}		 
-		{{[_ tasks.Send_Class_Schedule]}		   {[_ tasks.Send_Class_Schedule]}}		 
-		{{[_ tasks.lt_Send_Personal_NoteLet]}	   {[_ tasks.lt_Send_Personal_NoteLet]}}	 
-		{{[_ tasks.Send_Web_Info_Card]}              {[_ tasks.Send_Web_Info_Card]}}             
-	    }}
+	    {options $opts}
 	}
 
         {task:text(text),optional
