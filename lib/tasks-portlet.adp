@@ -11,7 +11,8 @@
 		party_id=@party_id@
  		query="@query@"
  		search_id="@search_id@"
-		tasks_interval="@tasks_interval@"
+		tasks_previous="@tasks_previous@"
+		tasks_future="@tasks_future@"
 		tasks_orderby="@tasks_orderby@"
 		page="@page@"
 		page_size="@page_size@"

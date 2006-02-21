@@ -6,6 +6,8 @@
 #        hide_form_p="t"
 #        page="@page@"
 #        tasks_orderby="@tasks_orderby@"
+#        tasks_previous="@tasks_previous@"
+#        tasks_future="@tasks_future@"
 #        page_flush_p="0"
 #        page_size="15"
 #        format="@format@"
@@ -20,8 +22,10 @@
 # emp_f          Filter to specify if you are going to show the tasks of the organizations only (1) or
 #                or also the employess tasks (2), default to 2.
 # show_filters_p Boolean to specify if you want to show the filters menu or not. Default to 0
+# tasks_previous Filter for tasks in the past in days
+# tasks_future   Filter for tasks in the future in days
 
-foreach optional_param {party_id query search_id tasks_interval page page_size page_flush_p elements} {
+foreach optional_param {party_id query search_id tasks_previous tasks_future page page_size page_flush_p elements} {
     if {![info exists $optional_param]} {
 	set $optional_param {}
     }
@@ -74,8 +78,11 @@ if {![exists_and_not_null party_id]} {
 
 set package_id [apm_package_id_from_key tasks]
 
-if { ![exists_and_not_null tasks_interval] } {
-    set tasks_interval 7
+if { ![exists_and_not_null tasks_previous] } {
+    set tasks_previous 0
+}
+if { ![exists_and_not_null tasks_future] } {
+    set tasks_future 7
 }
 if { ![exists_and_not_null orderby] } {
     set orderby "priority,desc"
@@ -97,7 +104,8 @@ set filters_list [list user_id [list where_clause "t.assignee_id = :user_id"] \
 		      search_id {} \
 		      query {} \
 		      page_size {} \
-		      tasks_interval {} \
+		      tasks_previous {} \
+		      tasks_future {} \
 		      party_id {} \
 		      process_instance {}]
 

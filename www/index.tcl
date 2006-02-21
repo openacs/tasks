@@ -11,7 +11,8 @@ ad_page_contract {
     {query ""}
     {page:optional "1"}
     {page_size:integer "25"}
-    {tasks_interval:integer "7"}
+    {tasks_future:integer "7"}
+    {tasks_previous:integer "0"}
     {page_flush_p "0"}
 }
 
@@ -21,7 +22,7 @@ set user_id [ad_conn user_id]
 set package_id [ad_conn package_id]
 set url [ad_conn url]
 
-set return_url [export_vars -base $url -url {orderby format search_id query page page_size tasks_interval {page_flush_p t}}]
+set return_url [export_vars -base $url -url {orderby format search_id query page page_size tasks_future tasks_previous {page_flush_p t}}]
 
 
 set package_id [site_node::get_element -url "/contacts" -element object_id]
@@ -40,7 +41,8 @@ set form_elements {
     {search_id:integer(select),optional {label ""} {options $search_options} {html {onChange "javascript:acs_FormRefresh('search')"}}}
     {query:text(text),optional {label ""} {html {size 20 maxlength 255}}}
     {save:text(submit) {label {[_ contacts.Search]}} {value "go"}}
-    {tasks_interval:integer(text),optional {label "&nbsp;&nbsp;<span style=\"font-size: smaller;\">[_ tasks.View_next]</span>"} {after_html "<span style=\"font-size: smaller;\">days"} {html {size 2 maxlength 3 onChange "javascript:acs_FormRefresh('search')"}}}
+    {tasks_previous:integer(text),optional {label "&nbsp;&nbsp;<span style=\"font-size: smaller;\">[_ tasks.View_previous]</span>"} {after_html "<span style=\"font-size: smaller;\">days"} {html {size 2 maxlength 3 onChange "javascript:acs_FormRefresh('search')"}}}
+    {tasks_future:integer(text),optional {label "&nbsp;&nbsp;<span style=\"font-size: smaller;\">[_ tasks.View_next]</span>"} {after_html "<span style=\"font-size: smaller;\">days"} {html {size 2 maxlength 3 onChange "javascript:acs_FormRefresh('search')"}}}
 }
 
 if { [parameter::get -boolean -parameter "ForceSearchBeforeAdd" -default "0"] } {

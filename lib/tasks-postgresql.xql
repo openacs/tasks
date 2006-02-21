@@ -35,7 +35,7 @@
       	and ao.object_id = t.task_id
         and ao.package_id = :package_id
       	and t.start_date < now()
-        and t.due_date < ( now() + '$tasks_interval days'::interval )
+        and t.due_date between ( now() - '$tasks_previous days'::interval ) and ( now() + '$tasks_future days'::interval )
 	and t.assignee_id = :user_id
         and t.party_id in ( select parties.party_id
                             from parties
@@ -60,7 +60,7 @@
         and ao.object_id = t.task_id
         and ao.package_id = :package_id
         and t.start_date < now()
-        and t.due_date < ( now() + '$tasks_interval days'::interval )
+        and t.due_date between ( now() - '$tasks_previous days'::interval ) and ( now() + '$tasks_future days'::interval )
 	and t.assignee_id = :user_id
         and t.party_id in ( select parties.party_id
                             from parties
