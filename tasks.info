@@ -7,15 +7,15 @@
     <initial-install-p>f</initial-install-p>
     <singleton-p>f</singleton-p>
     
-    <version name="0.1d8" url="http://openacs.org/repository/download/apm/tasks-0.1d8.apm">
+    <version name="0.1d9" url="http://openacs.org/repository/download/apm/tasks-0.1d9.apm">
         <owner url="mailto:openacs@geddert.com">Matthew Geddert</owner>
         <summary>Keep track of tasks to do.</summary>
         <release-date>2006-02-15</release-date>
         <description format="text/html">This package uses project manager tcl and sql as the base for a simple task program without project manager's complexity.</description>
         <maturity>0</maturity>
 
-        <provides url="tasks" version="0.1d8"/>
-        <requires url="project-manager" version="2.70a1"/>
+        <provides url="tasks" version="0.1d9"/>
+        <requires url="contacts" version="1.2b5"/>
         <requires url="workflow" version="2.0.0b4"/>
 
         <callbacks>
@@ -23,6 +23,7 @@
             <callback type="after-upgrade"  proc="tasks::install::after_upgrade"/>
         </callbacks>
         <parameters>
+            <parameter datatype="number"  min_n_values="1"  max_n_values="1"  name="AssigneesGroupId"  default="-2" description="The group_id where we should look for valid assignees. By default this is -2, i.e. all users on the system. This list can get very large and you may want to use a different group, such as a group that all employees of the organization are in, so that the list of possible assignees is much shorter." section_name="All"/>
             <parameter datatype="string"  min_n_values="1"  max_n_values="1"  name="DefaultPortletLayout"  default="/packages/tasks/lib/portlet" description="The src of the portlet layout to use in the portlets." section_name="Templates"/>
             <parameter datatype="string"  min_n_values="1"  max_n_values="1"  name="DefaultTasks"  default="tasks.lt_Delete_from_Recruitin;tasks.Follow_Up_Call;tasks.Follow_Up_Email;tasks.Have_they_responded;tasks.lt_Provide_Promotional_I;tasks.Send_Letter;tasks.Send_Birthday_Card;tasks.Send_Class_Schedule;tasks.lt_Send_Personal_NoteLet;tasks.Send_Web_Info_Card" description="A colon delimited (;) list of message-keys representing the tasks that should be display as a drop down."/>
         </parameters>

@@ -24,6 +24,7 @@ ad_page_contract {
     }
 }
 
+tasks::require_belong_to_package -objects $process_id
 
 set package_id [ad_conn package_id]
 set user_id    [ad_maybe_redirect_for_registration]

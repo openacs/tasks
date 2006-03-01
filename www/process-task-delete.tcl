@@ -13,6 +13,8 @@ ad_page_contract {
     {orderby ""}
 }
 
+tasks::require_belong_to_package -objects $process_task_id
+tasks::require_belong_to_package -objects $process_id
 
 set num_entries [llength $process_task_id]
 

@@ -18,6 +18,8 @@ create table t_processes (
         workflow_id                     integer
                                         constraint t_process_workflow_fk
                                         references workflows
+        -- the user assigned to this process
+	assignee_id                     integer
 );
 
 create table t_process_instances (
@@ -30,9 +32,6 @@ create table t_process_instances (
                                         constraint t_process_instances_process_fk
                                         references t_processes,
         case_id                         integer,
-        party_id                        integer
-                                        constraint t_process_instances_party_fk
-                                        references parties,
         object_id                       integer
                                         constraint t_process_instances_tasks_object_fk
                                         references acs_objects
@@ -76,9 +75,6 @@ create table t_process_tasks (
         closing_action_id       integer
                                 constraint t_process_tasks_close_action_fk
                                 references workflow_actions,
-        party_id                integer
-                                constraint t_process_tasks_party_fk
-                                references parties,
         object_id               integer
                                 constraint t_process_tasks_object_fk
                                 references acs_objects,
@@ -110,16 +106,7 @@ create table t_tasks (
         process_task_id         integer
                                 constraint t_tasks_process_task_fk
                                 references t_process_tasks,
-	-- The party_id is the party whom this task is associated with (e.g. the contact)
-        party_id                integer
-                                constraint t_tasks_party_fk
-                                references parties,
-	-- The object_id of the Object that triggered this task. If you created an offer
-	-- and want to have a reminder to phone, the party_id would be the recipient of the offer
-	-- the object_id would be the offer_id and the creation_user (assignee who is doing the job)
-	-- would be yourself. 
-	-- As we are very bad in design we realized too late that it might make sense to change the 
-	-- assignee at a later stage, we now modify the creation_user for this. 
+        -- the object_id this tasks is applied to (such as a person, organization, page, etc.)
         object_id               integer
                                 constraint t_tasks_object_fk
                                 references acs_objects,
@@ -135,6 +122,7 @@ create table t_tasks (
         start_date              timestamptz,
         due_date                timestamptz,
         completed_date          timestamptz,
+        -- the user assigned to this task
 	assignee_id             integer
 );
 
@@ -233,111 +221,33 @@ begin
                             ELSE to_char(p_date,''Mon DD (Dy)'') END
                        ELSE to_char(p_date,''Mon DD, YYYY'') END;
 
-
         return v_date;
 end;' language 'plpgsql';
-
-create or replace function tasks__completion_date (
-	integer
-) returns timestamptz
-as '
-declare
-        p_task_id               alias for $1;
-        v_complete_p            boolean;
-        v_date                  varchar;
-        v_previous_p            boolean;
-        revision                record;
-begin
-        v_complete_p := ''1'' from pm_tasks where task_id = p_task_id and status = ''2'';
-        v_date := NULL;
-
-        IF v_complete_p THEN 
-              v_previous_p := ''t'';
-              FOR revision IN 
-                  select ptr.percent_complete, ao.creation_date
-                    from cr_revisions cr, pm_tasks_revisions ptr, acs_objects ao
-                   where cr.item_id = p_task_id
-                     and cr.revision_id = ao.object_id
-                     and cr.revision_id = ptr.task_revision_id
-                   order by ao.creation_date desc
-              LOOP                 
-                    IF revision.percent_complete = ''100'' AND v_previous_p THEN
-	                  v_date := revision.creation_date;
-                    ELSE
-                          v_previous_p := ''f'';
-                          EXIT;
-                    END IF;
-              END LOOP;
-
-        END IF;
-
-        return v_date;
-end;' language 'plpgsql';
-
-
-create or replace function tasks__completion_user (
-	integer
-) returns integer
-as '
-declare
-        p_task_id               alias for $1;
-        v_complete_p            boolean;
-        v_user                  varchar;
-        v_previous_p            boolean;
-        revision                record;
-begin
-        v_complete_p := ''1'' from pm_tasks where task_id = p_task_id and status = ''2'';
-        v_user := NULL;
-
-        IF v_complete_p THEN 
-              v_previous_p := ''t'';
-              FOR revision IN 
-                  select ptr.percent_complete, ao.creation_user
-                    from cr_revisions cr, pm_tasks_revisions ptr, acs_objects ao
-                   where cr.item_id = p_task_id
-                     and cr.revision_id = ao.object_id
-                     and cr.revision_id = ptr.task_revision_id
-                   order by ao.creation_date desc
-              LOOP                 
-                    IF revision.percent_complete = ''100'' AND v_previous_p THEN
-	                  v_user := revision.creation_user;
-                    ELSE
-                          v_previous_p := ''f'';
-                          EXIT;
-                    END IF;
-              END LOOP;
-
-        END IF;
-
-        return v_user;
-end;' language 'plpgsql';
-
 
 -----------------------------
 
-select define_function_args('tasks_task__new','task_id,process_instance_id,process_task_id,party_id,object_id,title,description,mime_type,comment,status_id,priority,start_date,due_date,package_id,creation_user,creation_ip,context_id,assignee_id');
+select define_function_args('tasks_task__new','task_id,process_instance_id,process_task_id,object_id,title,description,mime_type,comment,status_id,priority,start_date,due_date,package_id,creation_user,creation_ip,context_id,assignee_id');
 
-create or replace function tasks_task__new (integer,integer,integer,integer,integer,varchar,text,varchar,text,integer,integer,timestamptz,timestamptz,integer,integer,varchar,integer,integer)
+create or replace function tasks_task__new (integer,integer,integer,integer,varchar,text,varchar,text,integer,integer,timestamptz,timestamptz,integer,integer,varchar,integer,integer)
 returns integer as '
 declare
     p_task_id                 alias for $1;
     p_process_instance_id     alias for $2;
     p_process_task_id         alias for $3;
-    p_party_id                alias for $4;
-    p_object_id               alias for $5;
-    p_title                   alias for $6;
-    p_description             alias for $7;
-    p_mime_type               alias for $8;
-    p_comment                 alias for $9;
-    p_status_id               alias for $10;
-    p_priority                alias for $11;
-    p_start_date              alias for $12;
-    p_due_date                alias for $13;
-    p_package_id              alias for $14;
-    p_creation_user           alias for $15;
-    p_creation_ip             alias for $16;
-    p_context_id              alias for $17;
-    p_assignee_id             alias for $18;
+    p_object_id               alias for $4;
+    p_title                   alias for $5;
+    p_description             alias for $6;
+    p_mime_type               alias for $7;
+    p_comment                 alias for $8;
+    p_status_id               alias for $9;
+    p_priority                alias for $10;
+    p_start_date              alias for $11;
+    p_due_date                alias for $12;
+    p_package_id              alias for $13;
+    p_creation_user           alias for $14;
+    p_creation_ip             alias for $15;
+    p_context_id              alias for $16;
+    p_assignee_id             alias for $17;
     v_task_id                 integer;
     v_start_date              timestamptz;
 begin
@@ -360,11 +270,11 @@ begin
     end if;
 
     insert into t_tasks
-    (task_id, process_instance_id, process_task_id, party_id, object_id,
+    (task_id, process_instance_id, process_task_id, object_id,
      title, description, mime_type, comment, status_id, priority,
      start_date, due_date, assignee_id)
     values
-    (v_task_id, p_process_instance_id, p_process_task_id, p_party_id,
+    (v_task_id, p_process_instance_id, p_process_task_id,
      p_object_id, p_title, p_description, p_mime_type, p_comment,
      p_status_id, p_priority, v_start_date, p_due_date, p_assignee_id);
 
@@ -373,30 +283,29 @@ end;
 ' language 'plpgsql';
 
 
-select define_function_args('tasks_process_task__new','task_id,process_id,open_action_id,closing_action_id,party_id,object_id,title,description,mime_type,comment,status_id,priority,start,due,package_id,creation_user,creation_ip,context_id,assignee_id');
+select define_function_args('tasks_process_task__new','task_id,process_id,open_action_id,closing_action_id,object_id,title,description,mime_type,comment,status_id,priority,start,due,package_id,creation_user,creation_ip,context_id,assignee_id');
 
-create or replace function tasks_process_task__new (integer,integer,integer,integer,integer,integer,varchar,text,varchar,text,integer,integer,numeric,numeric,integer,integer,varchar,integer,integer)
+create or replace function tasks_process_task__new (integer,integer,integer,integer,integer,varchar,text,varchar,text,integer,integer,numeric,numeric,integer,integer,varchar,integer,integer)
 returns integer as '
 declare
     p_task_id                 alias for $1;
     p_process_id              alias for $2;
     p_open_action_id          alias for $3;
     p_closing_action_id       alias for $4;
-    p_party_id                alias for $5;
-    p_object_id               alias for $6;
-    p_title                   alias for $7;
-    p_description             alias for $8;
-    p_mime_type               alias for $9;
-    p_comment                 alias for $10;
-    p_status_id               alias for $11;
-    p_priority                alias for $12;
-    p_start                   alias for $13;
-    p_due                     alias for $14;
-    p_package_id              alias for $15;
-    p_creation_user           alias for $16;
-    p_creation_ip             alias for $17;
-    p_context_id              alias for $18;
-    p_assignee_id             alias for $19;
+    p_object_id               alias for $5;
+    p_title                   alias for $6;
+    p_description             alias for $7;
+    p_mime_type               alias for $8;
+    p_comment                 alias for $9;
+    p_status_id               alias for $10;
+    p_priority                alias for $11;
+    p_start                   alias for $12;
+    p_due                     alias for $13;
+    p_package_id              alias for $14;
+    p_creation_user           alias for $15;
+    p_creation_ip             alias for $16;
+    p_context_id              alias for $17;
+    p_assignee_id             alias for $18;
     v_task_id                 integer;
 begin
     v_task_id:= acs_object__new(
@@ -412,12 +321,12 @@ begin
     );
 
     insert into t_process_tasks
-    (task_id, process_id, open_action_id, closing_action_id, party_id,
+    (task_id, process_id, open_action_id, closing_action_id,
      object_id, title, description, mime_type, comment, status_id,
      priority, start, due, assignee_id)
     values
     (v_task_id, p_process_id, p_open_action_id, p_closing_action_id,
-     p_party_id, p_object_id, p_title, p_description, p_mime_type,
+     p_object_id, p_title, p_description, p_mime_type,
      p_comment, p_status_id, p_priority, p_start, p_due, p_assignee_id);
 
     return v_task_id;
@@ -425,9 +334,9 @@ end;
 ' language 'plpgsql';
 
 
-select define_function_args('tasks_process__new','process_id,title,description,mime_type,workflow_id,package_id,creation_user,creation_ip,context_id');
+select define_function_args('tasks_process__new','process_id,title,description,mime_type,workflow_id,assignee_id,package_id,creation_user,creation_ip,context_id');
 
-create or replace function tasks_process__new (integer,varchar,text,varchar,integer,integer,integer,varchar,integer)
+create or replace function tasks_process__new (integer,varchar,text,varchar,integer,integer,integer,integer,varchar,integer)
 returns integer as '
 declare
     p_process_id              alias for $1;
@@ -435,10 +344,11 @@ declare
     p_description             alias for $3;
     p_mime_type               alias for $4;
     p_workflow_id             alias for $5;
-    p_package_id              alias for $6;
-    p_creation_user           alias for $7;
-    p_creation_ip             alias for $8;
-    p_context_id              alias for $9;
+    p_assignee_id             alias for $6;
+    p_package_id              alias for $7;
+    p_creation_user           alias for $8;
+    p_creation_ip             alias for $9;
+    p_context_id              alias for $10;
     v_process_id              integer;
 begin
     v_process_id:= acs_object__new(
@@ -454,29 +364,28 @@ begin
     );
 
     insert into t_processes
-    (process_id, title, description, mime_type, workflow_id)
+    (process_id, title, description, mime_type, workflow_id, assignee_id)
     values
-    (v_process_id, p_title, p_description, p_mime_type, p_workflow_id);
+    (v_process_id, p_title, p_description, p_mime_type, p_workflow_id, p_assignee_id);
 
     return v_process_id;
 end;
 ' language 'plpgsql';
 
 
-select define_function_args('tasks_process_instance__new','process_instance_id,process_id,case_id,party_id,object_id,package_id,creation_user,creation_ip,context_id');
+select define_function_args('tasks_process_instance__new','process_instance_id,process_id,case_id,object_id,package_id,creation_user,creation_ip,context_id');
 
-create or replace function tasks_process_instance__new (integer,integer,integer,integer,integer,integer,integer,varchar,integer)
+create or replace function tasks_process_instance__new (integer,integer,integer,integer,integer,integer,varchar,integer)
 returns integer as '
 declare
     p_process_instance_id     alias for $1;
     p_process_id              alias for $2;
     p_case_id                 alias for $3;
-    p_party_id                alias for $4;
-    p_object_id               alias for $5;
-    p_package_id              alias for $6;
-    p_creation_user           alias for $7;
-    p_creation_ip             alias for $8;
-    p_context_id              alias for $9;
+    p_object_id               alias for $4;
+    p_package_id              alias for $5;
+    p_creation_user           alias for $6;
+    p_creation_ip             alias for $7;
+    p_context_id              alias for $8;
     v_process_instance_id     integer;
 begin
     v_process_instance_id:= acs_object__new(
@@ -492,9 +401,9 @@ begin
     );
 
     insert into t_process_instances
-    (process_instance_id, process_id, case_id, party_id, object_id)
+    (process_instance_id, process_id, case_id, object_id)
     values
-    (v_process_instance_id, p_process_id, p_case_id, p_party_id, p_object_id);
+    (v_process_instance_id, p_process_id, p_case_id, p_object_id);
 
     return v_process_instance_id;
 end;

@@ -12,6 +12,8 @@ ad_page_contract {
     {return_url:notnull}
 }
 
+tasks::require_belong_to_package -objects $task_id 
+
 set num_entries [llength $task_id]
 
 if { [string is false $confirm_p] } {

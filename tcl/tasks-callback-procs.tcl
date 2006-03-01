@@ -75,9 +75,14 @@ ad_proc -public tasks::workflow::impl::action_side_effect::do {
     ns_log notice "\#\#\# entering tasks-action-callback: $case_id, $object_id, $action_id"
 
     db_1row process_id {
-	select process_instance_id, process_id, party_id, object_id
-	from t_process_instances
-	where case_id = :case_id
+	select tp.process_instance_id,
+               tp.process_id,
+               tp.object_id,
+               o.package_id
+          from t_process_instances tp,
+               acs_objects o
+	 where tp.process_instance_id = o.object_id
+           and tp.case_id = :case_id
     }
 
     set tasks [db_list_of_lists process_tasks {
@@ -95,7 +100,6 @@ ad_proc -public tasks::workflow::impl::action_side_effect::do {
 	set new_task_id [tasks::task::new \
 			    -process_instance_id $process_instance_id \
 			    -process_task_id $process_task_id \
-			    -party_id $party_id \
 			    -object_id $object_id \
 			    -title $title \
 			    -description $description \
@@ -104,7 +108,8 @@ ad_proc -public tasks::workflow::impl::action_side_effect::do {
 			    -status_id $status_id \
 			    -priority $priority \
 			    -start_date $start_date \
-			    -due_date $due_date]
+			    -due_date $due_date \
+			    -package_id $package_id]
     }
 }
 
@@ -118,4 +123,76 @@ ad_proc -public tasks::workflow::impl::action_side_effect::pretty_name {} {
     Get the pretty name of this implementation.
 } {
     return "tasks"
+}
+
+
+ad_proc -public -callback contacts::redirect -impl tasks {
+    {-party_id ""}
+    {-action ""}
+} {
+    redirect the contact to the correct tasks stuff
+} {
+
+    if { [exists_and_not_null party_id] } {
+
+	switch $action {
+	    tasks { set file "/packages/tasks/www/contact" }
+	    tasks-mark-completed { set file "/packages/tasks/www/mark-completed" }
+            tasks-change-assignee { set file "/packages/tasks/www/change-assignee" }
+	    tasks-delete { set file "/packages/tasks/www/delete" }
+	}
+
+	if { [exists_and_not_null file] } {
+	    if { [ns_queryget object_id] eq "" } {
+		rp_form_put object_id $party_id
+	    }
+	    rp_internal_redirect ${file}
+	}
+
+    } 
+    if  { [regexp "^[ad_conn package_url](.*)$" [ad_conn url] match url_request] } {
+	ns_log notice "tasks implementation of contact::redirecturl_request $url_request"
+	switch $url_request {
+	    processes { set file "/packages/tasks/www/processes" }
+	    process { set file "/packages/tasks/www/process" }
+	    process-add-edit { set file "/packages/tasks/www/process-add-edit" }
+	    process-delete { set file "/packages/tasks/www/process-delete" }
+	    process-task { set file "/packages/tasks/www/process-task" }
+	    process-task-delete { set file "/packages/tasks/www/process-task-delete" }
+            tasks { set file "/packages/tasks/www/index" }
+	    tasks-change-assignee { set file "/packages/tasks/www/change-assignee" }
+	}
+	if { [exists_and_not_null file] } {
+	    rp_internal_redirect $file
+	}
+    }
+
+}
+
+
+ad_proc -public -callback subsite::url -impl tasks_task {
+    {-package_id:required}
+    {-object_id:required}
+    {-type ""}
+} {
+    return the page_url for an object of type tasks_task
+} {
+#
+# I NEED TO FIX THIS, THIS COMES FROM PROJECT MANAGER
+#
+    if { [apm_package_key_from_id $package_id] eq "contacts" } {
+	set party_id [db_string get_it { select party_id from t_tasks where task_id = :object_id } -default {}]
+	if { [exists_and_not_null party_id] } {
+	    if {$type=="edit"} {
+		return "[contact::url -party_id $party_id -package_id $package_id]task/$object_id"
+	    } else {
+		return "[contact::url -party_id $party_id -package_id $package_id]task/$object_id"
+	    }
+	}
+    } else {
+
+    }
+
+
+
 }

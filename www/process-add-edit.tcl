@@ -16,6 +16,9 @@ ad_page_contract {
     title:onevalue
 }
 
+if { ![ad_form_new_p -key process_id] } {
+    tasks::require_belong_to_package -objects $process_id 
+}
 set package_id [ad_conn package_id]
 set user_id    [ad_maybe_redirect_for_registration]
 

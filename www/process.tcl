@@ -25,6 +25,9 @@ ad_page_contract {
     process_id:notnull {You must specify a process to use. Please back up and select a process}
 }
 
+tasks::require_belong_to_package -objects $process_id
+
+
 # --------------------------------------------------------------- 
 
 # the unique identifier for this package
@@ -95,7 +98,7 @@ template::list::create \
         }
     } \
     -bulk_actions {
-        "Delete" "process-task-delete" "Delete tasks" "#tasks.Change_Assignee#" change-assignee "#tasks.Change_Assignee#"
+        "Delete" "process-task-delete" "Delete tasks" "#tasks.Change_Assignee#" tasks-change-assignee "#tasks.Change_Assignee#"
     } \
     -bulk_action_export_vars {
         process_id

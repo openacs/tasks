@@ -6,15 +6,8 @@
 <tr>
     <td>
 	<include src="/packages/tasks/lib/tasks-portlet"
-		 user_id=@user_id@
-		 query="@query@"
-		 search_id="@search_id@"
-		 tasks_future="@tasks_future@"
-		 tasks_previous="@tasks_previous@"
-		 tasks_orderby="@tasks_orderby@"
-		 page="@page@"
-		 page_size="@page_size@"
-		 page_flush_p="@page_flush_p@" />
+                 object_query=@object_query;noquote@ />
+
     </td>
 </tr>
 </table>

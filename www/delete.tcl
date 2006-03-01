@@ -5,48 +5,19 @@ ad_page_contract {
     @cvs-id $Id$
 
 } {
-    {task_id:integer,multiple}
-    {confirm_p:boolean 1}
+    {task_id:integer,multiple,notnull}
     {return_url:notnull}
 }
 
-
-set num_entries [llength $task_id]
-set user_id [ad_conn user_id]
-
-if { [string is false $confirm_p] } {
-
-    if { $num_entries == 0 } {
-	ad_returnredirect ./
-	return
-    }
-    set task_pretty [ad_decode $num_entries 1 "[_ tasks.Task]" "[_ tasks.Tasks]"]
-    set title "[_ tasks.Delete_task_pretty]"
-    set context [list $title]
-    set task2_pretty [ad_decode $num_entries 1 "[_ tasks.this_task]" "[_ tasks.these_tasks]"]
-    set context [list $title]
-    set question "[_ tasks.lt_Are_you_sure_you_want_1]"
-    set yes_url "delete?[export_vars { task_id:multiple { confirm_p 1 } return_url}]"                                                    
-    set no_url "${return_url}"
-    return
-}
-
+tasks::require_belong_to_package -objects $task_id
 
 set task_titles [list]
 foreach task_id $task_id {
-    lappend task_titles [db_string get_task_title {
-	select t.title
-	from t_tasks
-	where t.task_id = :task_id
-    }]
-    db_dml mark_delete {
-	update t_tasks
-	set status_id = null
-	where task_id = :task_id
-    }
+    lappend task_titles [tasks::task::title -task_id $task_id]
+    tasks::task::delete -task_id $task_id
 }
 
-if { $num_entries > 1 } {
+if { [llength $task_titles] > 1 } {
     set task_list ""
     set num 1
     foreach task_title $task_titles {

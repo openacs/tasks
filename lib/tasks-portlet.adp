@@ -7,16 +7,12 @@
     <table border="0" cellpadding="1" cellspacing="1" width="100%">
       <tr>
         <td>
-	<include src="/packages/tasks/lib/tasks"
-		party_id=@party_id@
- 		query="@query@"
- 		search_id="@search_id@"
-		tasks_previous="@tasks_previous@"
-		tasks_future="@tasks_future@"
-		tasks_orderby="@tasks_orderby@"
-		page="@page@"
-		page_size="@page_size@"
-		page_flush_p="@page_flush_p@" />
+	     <include
+        	src="/packages/tasks/lib/tasks"
+	        object_query=@object_query@
+		page_size="50" 
+		show_filters_p="1"
+                hide_elements="" />	
         </td>
       </tr>
     </table>

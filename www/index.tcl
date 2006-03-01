@@ -16,6 +16,8 @@ ad_page_contract {
     {page_flush_p "0"}
 }
 
+
+
 set title "[_ tasks.Tasks]"
 set context {}
 set user_id [ad_conn user_id]
@@ -62,3 +64,14 @@ ad_form -name "search" -method "GET" -export {orderby page_size format} -form $f
     } -after_submit {
     }
 
+
+set object_query "
+select parties.party_id
+  from parties
+       left join cr_items on (parties.party_id = cr_items.item_id) 
+       left join cr_revisions on (cr_items.latest_revision = cr_revisions.revision_id ),
+       group_distinct_member_map
+ where parties.party_id = group_distinct_member_map.member_id
+       and group_distinct_member_map.group_id in ('[join [contacts::default_groups] "','"]')
+[contact::search_clause -and -search_id $search_id -query $query -party_id "parties.party_id" -revision_id "revision_id"]
+"

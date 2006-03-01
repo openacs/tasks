@@ -9,6 +9,8 @@ ad_page_contract {
     {return_url:notnull}
 }
 
+tasks::require_belong_to_package -objects $process_id 
+
 set party_ids [db_list get_party_ids "
 	    select distinct party_id
               from pm_task_assignment

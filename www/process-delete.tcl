@@ -18,6 +18,8 @@ ad_page_contract {
 } -errors {
 }
 
+tasks::require_belong_to_package -objects $process_id
+
 set package_id [ad_conn package_id]
 permission::require_permission -object_id $package_id -privilege delete
 
@@ -29,8 +31,10 @@ if {[string is false $confirm_p]} {
 	where process_id = :process_id
     }
 
+
     set title "Delete process: $title"
     set context [list "Delete: $title"]
+    set process $title
 
     set yes_url [export_vars -base process-delete {process_id assignee_id {confirm_p 1} return_url}]
     set no_url $return_url

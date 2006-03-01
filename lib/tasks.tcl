@@ -17,139 +17,318 @@
 # page           For pagination
 # page_flush     For pagination
 # page_size      How many rows are we going to show
-# order_by       For the order_by clause
-# format         The display format of the list. Normal
-# emp_f          Filter to specify if you are going to show the tasks of the organizations only (1) or
-#                or also the employess tasks (2), default to 2.
-# show_filters_p Boolean to specify if you want to show the filters menu or not. Default to 0
 # tasks_previous Filter for tasks in the past in days
 # tasks_future   Filter for tasks in the future in days
+# status_id ...
+# hide_elements  List the template::list elements you don't want displated. if checkbox is listed bulk actions will be disabled for this include
 
-foreach optional_param {party_id query search_id tasks_previous tasks_future page page_size page_flush_p elements} {
+set url [ad_conn url]
+
+set optional_params {start_date end_date page_size hide_elements}
+set required_params {object_query object_ids object_id assignee_query assignee_ids assignee_id}
+set special_params {task_action_id task_action party_id process_id}
+set ad_form_params {__confirmed_p __refreshing_p __key_signature __new_p}
+set task_form_vars [concat [ns_queryget task_form_vars] task_form_vars]
+
+set filters_list [list]
+set page_elements [list]
+set submitted_vars [tasks::get_submitted_as_list]
+foreach {key value} $submitted_vars {
+    # we only pass on vars that cannot be submitted by the include
+    # this way somebody cannot pass a variable via the http request
+    # what is hard coded by the include by the programmer
+    if { [lsearch [concat $optional_params $required_params $special_params $ad_form_params $task_form_vars] $key] < 0 && [string is false [regexp {^formbutton:} $key match]] } {
+	# the variable is not expected to be submitted via
+        # the include statement, so we can set this variable
+	
+	# we have one special variable, namely task_id
+        # because it is able to used with bulk actions
+        # if the key is task_id, we check it the variable
+        # already exists and it it does we add it as a list
+        # otherwise we just overrite the previous key with
+        # the new one
+
+	if { $key == "task_id" && [exists_and_not_null task_id] } {
+	    lappend task_id $value
+	} else {
+	    set $key $value
+	}
+	if { $key ne "return_url" } {
+	    lappend page_elements $key
+	}
+	if { [lsearch [list groupby orderby format page] $key] < 0 } {
+	    # the variable is not a reserved filter name
+	    lappend filters_list $key {}
+	}
+    }
+}
+
+
+set return_url [export_vars -base $url -url $page_elements]
+set add_url [export_vars -base $url -url [concat $page_elements {{task_action add}}]]
+set add_process_url [export_vars -base $url -url [concat $page_elements {{task_action add_process}}]]
+
+
+foreach optional_param [concat $optional_params $special_params] {
     if {![info exists $optional_param]} {
 	set $optional_param {}
     }
 }
 
-set tasks_url "/tasks/"
-
-set row_list [list]
-foreach element $elements {
-    lappend row_list $element
-    lappend row_list {}
+set export_vars_list [list]
+foreach page_element [concat $page_elements $special_params] {
+    lappend export_vars_list $page_element [set $page_element]
 }
 
-if { ![exists_and_not_null format] } {
-    set format "normal"
+
+if { [exists_and_not_null page_size] } {
+    # The default page size for tasks
+    set page_size "25"
 }
 
 if { ![exists_and_not_null show_filters_p] } {
-    # Boolean to especify to show the filters or not
+    # Boolean to specify to show the filters or not
     set show_filters_p 0
 }
 
-if { ![exists_and_not_null emp_f] } {
-    # Show tasks of the employees
-    set emp_f 2
-}
 
-# If we are not viewing the tasks of a party, view the tasks of the user
-if {![exists_and_not_null party_id]} {
 
-    # the user_id is used for the filter. user_id2 for comparison
-    if {![exists_and_not_null user_id]} {
-	set user_id [ad_conn user_id]
-    }
-    set contact_id $user_id
-    set user_id2 $user_id
-    if {$user_id == [ad_conn user_id]} {
-	set user_id2 ""
-    }
-    set party_id ""
-    unset party_id
-    set page_query_name own_tasks_pagination
-    set query_name own_tasks
+
+
+
+set limitations_clause ""
+
+# we require one of the following:
+#
+# 1. object_query - an sql query which returns all valid object_ids for which to display tasks
+#   or
+# 2. object_ids - a tcl list of object_ids for which to display tasks
+#   or
+# 3. object_id - an object_id for which to display tasks
+#
+# only one can be provided to be valid. If none are provided the only
+# other valid option is to specify specific assignees
+if { 
+    ( [info exists object_query] && ![info exists object_ids] && ![info exists object_id] ) ||
+    ( ![info exists object_query] && [info exists object_ids] && ![info exists object_id] ) ||
+    ( ![info exists object_query] && [info exists object_ids] && ![info exists object_id] ) 
+} {
+    # we only have one provided object_id list, this is correct set up
 } else {
-    set contact_id $party_id 
-    set user_id2 ""
-    set page_query_name contact_tasks_pagination
-    set query_name contact_tasks
+#    error "packages/tasks/lib/tasks - invalid include you must specify one (and only one) of the following: object_query, object_ids, object_id :: $object_id"
 }
 
-set package_id [apm_package_id_from_key tasks]
-
-if { ![exists_and_not_null tasks_previous] } {
-    set tasks_previous 0
-}
-if { ![exists_and_not_null tasks_future] } {
-    set tasks_future 7
-}
-if { ![exists_and_not_null orderby] } {
-    set orderby "priority,desc"
-}
-if { ![exists_and_not_null status_id] } {
-    set status_id "1"
-}
-if { ![exists_and_not_null package_id] } {
-    set package_id [ad_conn package_id]
+set single_object_p 0
+if { [info exists object_ids] } {
+    set object_query [template::util::tcl_to_sql_list $object_ids]
+} elseif { [info exists object_id] } {
+    set single_object_p 1
+    set object_query '$object_id'
 }
 
-if {[exists_and_not_null search_id]} {
-    set group_where_clause ""
+append limitations_clause "\n and t.object_id in ( $object_query )"
+
+# you may specify a list of assignees as well if you like, they are similar to the object
+# queries and ids this is not required. You may only specify one of the following, assignee_query, assignee_ids, assignee_id
+
+if { [info exists assignee_query] || [info exists assignee_ids] || [info exists assignee_id] } {
+    if {
+	( [info exists assignee_query] && ![info exists assignee_ids] && ![info exists assignee_id] ) ||
+	( ![info exists assignee_query] && [info exists assignee_ids] && ![info exists assignee_id] ) ||
+	( ![info exists assignee_query] && [info exists assignee_ids] && ![info exists assignee_id] ) 
+    } {
+	# we only have one provided object_id list, this is correct set up
+    } else {
+	error "packages/tasks/lib/tasks - invalid include you must specify one (and only one) of the following: assignee_query, assignee_ids, assignee_id"
+    }
+
+    if { [info exists assignee_ids] } {
+	set assignee_query [template::util::tcl_to_sql_list $object_ids]
+    } elseif { [info exists object_id] } {
+	set assignee_query '$object_id'
+    }
+
+    if { [exists_and_not_null assignee_query] } {
+	append limitations_clause "\n and t.assignee_id in ( $assignee_query )"
+    }
+}
+
+append limitations_clause "\n and ao.package_id = [ad_conn package_id]"
+
+if { $start_date ne "" } {
+    append limitations_clause "\n and t.due_date >= '$start_date'"
+}
+
+if { $end_date ne "" } {
+    append limitations_clause "\n and t.due_date <= '$end_date'"
+}
+
+
+
+
+
+
+
+
+# before doing anything we check for the special vars task_action and task_action_id
+# these actions are performed here because it requires less code to maintain just this
+# one page, instead of routing to specialized pages.
+# 
+# we are also able to verify that this user is in fact able to perform this action
+# with this task here on this page much more simply that on a secondary trigger page
+
+set task_action [ns_queryget task_action]
+set task_action_id [ns_queryget task_action_id]
+set show_form_p 0
+if { $task_action ne "" && $task_action_id ne "" && [string is integer $task_action_id] } {
+    # somebody is attempting to perform an action on the tasks.
+    # we need to first validate that this task is in fact accessible
+    # to this user through this page.
+    if { [db_0or1row task_available_for_action {}] } {
+	set task [tasks::task::title -task_id $task_action_id]
+	set task_url [export_vars -base $url -url [concat $page_elements {{task_id $task_action_id} {task_action edit}}]]
+	switch $task_action {
+	    complete {
+		tasks::task::complete -task_id $task_action_id
+		set task_title $task
+		util_user_message -html -message "[_ tasks.task_completed]"
+	    }
+	    interval_increase {
+		tasks::task::modify_interval -task_id $task_action_id -method "increase"
+		util_user_message -html -message  "[_ tasks.task_delayed]"
+	    }
+	    interval_decrease {
+		tasks::task::modify_interval -task_id $task_action_id -method "decrease"
+		util_user_message -html -message  "[_ tasks.task_moved_up]"
+	    }
+	    edit {
+		set show_form_p 1
+	    }
+	}
+	if { [exists_and_not_null edit_task_id] } {
+	    # in order to prevent double-click errors we have to redirect back to this url
+	    # above the return_url has already been cleaned for us.
+	    ad_returnredirect $return_url
+	    ad_script_abort
+	}
+    } else {
+	# we can return a permissions error here if we want to
+	# for now we will just display the page and silently
+        # ignore this error
+    }
+} elseif { $task_action eq "add" } {
+    set show_form_p 1
+} elseif { $task_action eq "add_process" } {
+
+    template::list::create \
+	-name processes \
+	-multirow processes \
+	-elements {
+	    assign {
+		label ""
+		display_template {
+		    <a href="@processes.assign_url@" class="button">Assign</a>
+		}
+	    }
+	    title {
+		label "Title"
+	    }
+	    description {
+		label "Description"
+	    }
+	    creator_name {
+		label "Manager"
+		link_url_eval $creator_url
+	    }
+	} -filters {}
+
+    db_multirow -extend { creator_url assign_url} -unclobber processes processes {} {
+	set creator_url "/o/$creation_user"
+
+	set assign_url [export_vars -base $url -url [concat $page_elements {process_id {task_action assign_process}}]]
+    }    
+
+} elseif { $task_action eq "assign_process" && [ns_queryget process_id] ne "" } {
+    set process_id [ns_queryget process_id]
+    tasks::require_belong_to_package -objects $process_id 
+
+
+    tasks::process::assign -object_id $object_id -process_id $process_id
+    #		util_user_message -html -message "[_ tasks.process_assigned]"
+    ad_returnredirect $return_url
+    ad_script_abort
+}
+
+
+if { [string is true $show_form_p] } {
+    set page_flush_p 1
 } else {
-    set group_where_clause "and group_distinct_member_map.group_id = [contacts::default_group]"
+    set page_flush_p 1
+#    set page_flush_p 0
 }
 
-set filters_list [list user_id [list where_clause "t.assignee_id = :user_id"] \
-		      search_id {} \
-		      query {} \
-		      page_size {} \
-		      tasks_previous {} \
-		      tasks_future {} \
-		      party_id {} \
-		      process_instance {}]
 
-# We are going to verify if the party_id is an organization
-# if it is, then we would retrieve the tasks also of the 
-# employees of the organization.
 
-set employee_where_clause "and t.party_id = :party_id"
-if { [apm_package_installed_p organizations] && [exists_and_not_null contact_id]} {
-    set org_p [organization::organization_p -party_id $contact_id]
-    if { $org_p } {
-        lappend filters_list emp_f {
-            label "[_ tasks.Tasks_Assigned_to]"
-            values { {"[_ tasks.Organization]" 1} { "[_ tasks.Employees]" 2 }}
-        }
-    }
 
-    if { $org_p && [string equal $emp_f 2] } {
-        set emp_list [contact::util::get_employees -organization_id $contact_id]
-        lappend emp_list $contact_id
-        set employee_where_clause " and t.party_id in ([template::util::tcl_to_sql_list $emp_list])"
+# [template::list::filter_where_clauses -and -name tasks]
+
+
+# and t.due_date between ( now() - '$tasks_previous days'::interval ) and ( now() + '$tasks_future days'::interval )
+
+#           and t.status_id <> 2
+
+
+
+
+
+
+#if { ![exists_and_not_null tasks_previous] } {
+#    set tasks_previous 0
+#}
+#if { ![exists_and_not_null tasks_future] } {
+#    set tasks_future 7
+#}
+#if { ![exists_and_not_null orderby] } {
+#    set orderby "priority,desc"
+#}
+#if { ![exists_and_not_null status_id] } {
+#    set status_id "1"
+#}
+
+
+
+
+
+
+
+
+
+set row_list [list]
+foreach element [list checkbox deleted_p priority title process_title object_name date assignee] {
+    if { $single_object_p && $element == "object_name" } {	
+    } elseif { [lsearch $hide_elements $element] < 0 } {
+	lappend row_list $element {}
     }
 }
 
-set done_url [export_vars -url -base "${tasks_url}contact" {orderby {status_id 2} {party_id $contact_id}}]
-set not_done_url [export_vars -url -base "${tasks_url}contact" {orderby {status_id 1} {party_id $contact_id}}]
-set return_url "[ad_conn url]?[ad_conn query]"
-set add_url [export_vars -base "${tasks_url}task" {return_url orderby status_id {party_id $contact_id}}]
-# set bulk_actions [list "[_ tasks.Reassign]" "${tasks_url}reassign-task" "[_ tasks.Reassign_selected]"\
-		      "[_ tasks.Change_Assignee]" "${tasks_url}change-assignee" "[_ tasks.Change_Assignee]"]
-set bulk_actions [list "[_ tasks.Change_Assignee]" "${tasks_url}change-assignee" "[_ tasks.Change_Assignee]"]
 
+if { [lsearch $hide_elements checkbox] >= 0 } {
+    set bulk_actions [list]
+} else {
+    set bulk_actions [list "[_ tasks.Change_Assignee]" "tasks-change-assignee" "[_ tasks.Change_Assignee]"]
+    lappend bulk_actions "[_ tasks.Delete]" "tasks-delete" "[_ tasks.Delete]"
+}
 template::list::create \
     -name tasks \
     -multirow tasks \
     -bulk_actions $bulk_actions \
-    -bulk_action_method post \
-    -bulk_action_export_vars { } \
-    -selected_format $format \
+    -bulk_action_export_vars {return_url} \
     -key task_id \
+    -selected_format "normal" \
     -orderby_name tasks_orderby \
     -page_size $page_size \
-    -page_flush_p 0 \
-    -page_query_name $page_query_name \
+    -page_flush_p $page_flush_p \
+    -page_query_name tasks_pagination \
     -elements {
         deleted_p {
 	    label {<img src="/resources/acs-subsite/checkboxchecked.gif" alt="[_ tasks.Not_Done]" border="0" height="13" width="13">}
@@ -186,9 +365,9 @@ template::list::create \
 		</else>
 	    }
 	}
-        contact_name {
+        object_name {
 	    label "[_ tasks.Contact]"
-	    link_url_eval $contact_url
+	    link_url_eval $object_url
 	} 
         date {
 	    label "[_ tasks.Date]"
@@ -196,7 +375,7 @@ template::list::create \
 		<if @tasks.done_p@><span class="done">@tasks.completed_date;noquote@</span></if>
                 <else>
 		  <if @tasks.due_date@>
-		<a href="@tasks.task_minus_url@" style="text-decoration: none; font-weight: bold;">&laquo;</a>&nbsp;<if @tasks.due_date_passed_p@><span style="color: red;"></if>@tasks.due_date;noquote@<if @tasks.due_date_passed_p@></span></if>&nbsp;<a href="@tasks.task_plus_url@" style="text-decoration: none; font-weight: bold;">&raquo;</a>
+		<a href="@tasks.interval_decrease_url@" style="text-decoration: none; font-weight: bold;">&laquo;</a>&nbsp;<if @tasks.due_date_passed_p@><span style="color: red;"></if>@tasks.due_date;noquote@<if @tasks.due_date_passed_p@></span></if>&nbsp;<a href="@tasks.interval_increase_url@" style="text-decoration: none; font-weight: bold;">&raquo;</a>
                   </if>
                 </else>
 	    }
@@ -247,7 +426,7 @@ template::list::create \
 	assignee {
 	    label "[_ tasks.Assignee]"
             orderby_desc "lower(contact__name(t.assignee_id)) desc, t.due_date asc, t.priority, lower(t.title)"
-            orderby_asc "lower(contact__name(.assignee_id)) asc, t.due_date asc, t.priority, lower(t.title)"
+            orderby_asc "lower(contact__name(t.assignee_id)) asc, t.due_date asc, t.priority, lower(t.title)"
 	    default_direction asc
 	}
     } -formats {
@@ -258,21 +437,34 @@ template::list::create \
 	}
     }
 
-db_multirow -extend {assignee_url contact_url complete_url done_p task_plus_url task_minus_url description_html task_url} -unclobber tasks $query_name {} {
-    set contact_url [contact::url -party_id $party_id]
-    set assignee_url [contact::url -party_id $assignee_id]
-    regsub -all "/tasks/" $assignee_url "/contacts/" assignee_url
-    set complete_url [export_vars -base "${tasks_url}mark-completed" -url {task_id orderby {party_id $contact_id} return_url}]
+
+db_multirow -extend {assignee_url assignee_name object_url complete_url done_p interval_increase_url interval_decrease_url description_html task_url} -unclobber tasks tasks {} {
+
+    set due_date [tasks::relative_date -date $due_date]
+    set completed_date [tasks::relative_date -date $completed_date]
+
+    set assignee_name [contact::name -party_id $assignee_id]
+
+    set object_url             "/o/$object_id"
+    set assignee_url           "/o/$assignee_id"
+    set task_url               [export_vars -base $url -url [concat $page_elements {{task_action_id $task_id} {task_action edit}}]]
+    set complete_url           [export_vars -base $url -url [concat $page_elements {{task_action_id $task_id} {task_action complete}}]]
+    set interval_increase_url  [export_vars -base $url -url [concat $page_elements {{task_action_id $task_id} {task_action interval_increase}}]]
+    set interval_decrease_url  [export_vars -base $url -url [concat $page_elements {{task_action_id $task_id} {task_action interval_decrease}}]]
+
     if { $status_id == "2" } {
 	set done_p 1
     } else {
 	set done_p 0
     }
-    set task_url [export_vars -base "${tasks_url}task" -url {{party_id $contact_id} orderby status_id task_id}]
-    set task_plus_url  [export_vars -base "${tasks_url}task-interval" -url {{action plus}  {days 7} {party_id $contact_id} task_id status_id orderby return_url}]
-    set task_minus_url [export_vars -base "${tasks_url}task-interval" -url {{action minus} {days 7} {party_id $contact_id} task_id status_id orderby return_url}]
 
-    regsub -all "\r|\n" $description {LiNeBrEaK} description
+    if { $done_p } {
+	set due_date $completed_date
+    }
+
+    regsub -all "\r" $description "\n" description
+    while { [regsub -all "\n\n" $description "\n" description] } {}
+    regsub -all "\n" $description {LiNeBrEaK} description
 
     set description_html [ad_html_text_convert \
 			      -from $mime_type \
@@ -280,8 +472,11 @@ db_multirow -extend {assignee_url contact_url complete_url done_p task_plus_url 
 			      -truncate_len "400" \
 			      -more "<a href=\"${task_url}\">[_ tasks.more]</a>" \
 			      -- $description]
-    regsub -all {LiNeBrEaKLiNeBrEaK} $description_html {LiNeBrEaK} description_html
-    regsub -all {LiNeBrEaK} $description_html {\&nbsp;\&nbsp;\&#182;\&nbsp;} description_html
-	regsub -all " " $due_date {\&nbsp;} due_date
-	regsub -all " " $completed_date {\&nbsp;} completed_date
+
+    regsub -all {LiNeBrEaK} $description_html "\\&nbsp;\\&nbsp;\\&#182;\\&nbsp;" description_html
+    regsub -all " " $due_date {\&nbsp;} due_date
+    regsub -all " " $completed_date {\&nbsp;} completed_date
 }
+#ad_return_error "AS" "<pre>$limitations_clause</pre>"
+
+ad_return_template

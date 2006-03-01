@@ -13,6 +13,7 @@
         from t_processes p, acs_objects o
         where p.process_id = o.object_id
         and p.workflow_id is not null
+        and o.package_id = :package_id
         order by lower(p.title)
     </querytext>
 </fullquery>
