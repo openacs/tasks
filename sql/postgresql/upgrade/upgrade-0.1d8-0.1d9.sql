@@ -99,7 +99,7 @@ drop function tasks_process_task__new (integer,integer,integer,integer,integer,i
 
 drop function tasks_process_instance__new (integer,integer,integer,integer,integer,integer,integer,varchar,integer);
 
-drop function tasks_process__new (integer,varchar,text,varchar,integer,integer,integer,varchar,integer)
+drop function tasks_process__new (integer,varchar,text,varchar,integer,integer,integer,varchar,integer);
 
 
 select define_function_args('tasks_task__new','task_id,process_instance_id,process_task_id,object_id,title,description,mime_type,comment,status_id,priority,start_date,due_date,package_id,creation_user,creation_ip,context_id,assignee_id');
