@@ -6,6 +6,10 @@ ad_page_contract {
     @cvs-id $Id$
 } {
     {search_id:integer ""}
+    {status_id ""}
+    {format ""}
+    {tasks_orderby ""}
+    {page ""}
     {query ""}
     {tasks_future:integer "7"}
     {tasks_previous:integer ""}
@@ -50,7 +54,7 @@ if { [parameter::get -boolean -parameter "ForceSearchBeforeAdd" -default "0"] } 
     }
 }
 
-ad_form -name "search" -method "GET" -export {orderby page_size format} -form $form_elements \
+ad_form -name "search" -method "GET" -export {status_id tasks_orderby page format} -form $form_elements \
     -on_request {
     } -edit_request {
     } -on_refresh {

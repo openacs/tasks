@@ -63,12 +63,6 @@ template::list::create \
     -pass_properties { admin_p } \
     -selected_format $mode \
     -elements {
-	assign {
-	    label ""
-	    display_template {
-                <a href="@processes.assign_url@" class="button">Assign</a>
-	    }
-	}
 	title {
 	    label "Title"
 	    display_template {
@@ -116,7 +110,6 @@ template::list::create \
 	    label "Assign Layout"
 	    layout table 
 	    row {
-                assign {}
 		title {}
 		description {}
 		creator_name {}
@@ -126,7 +119,6 @@ template::list::create \
 	    label "Admin Layout"
 	    layout table 
 	    row {
-		assign {}
 		title {}
 		description {}
 		creator_name {}

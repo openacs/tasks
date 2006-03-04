@@ -1,5 +1,6 @@
 <master src="/packages/contacts/lib/contacts-master" />
-<p><formtemplate id="search" style="proper-inline"></formtemplate></p>
+
+<p><formtemplate id="search" style="../../../contacts/resources/forms/inline"></formtemplate></p>
 
 <br />
 <table width="100%">

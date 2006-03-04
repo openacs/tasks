@@ -35,6 +35,7 @@ if {[string is false $confirm_p]} {
     set title "Delete process: $title"
     set context [list "Delete: $title"]
     set process $title
+    set one_line $title
 
     set yes_url [export_vars -base process-delete {process_id assignee_id {confirm_p 1} return_url}]
     set no_url $return_url
@@ -49,4 +50,4 @@ db_dml delete_process {
     where process_id = :process_id
 }
 
-ad_returnredirect -message "Process deleted" $return_url
+ad_returnredirect -message [_ tasks.Process_deleted] $return_url

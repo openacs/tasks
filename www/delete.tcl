@@ -21,7 +21,7 @@ if { [llength $task_titles] > 1 } {
     set task_list ""
     set num 1
     foreach task_title $task_titles {
-	if { $num == $num_entries } {
+	if { $num == [llength $task_titles] } {
 	    append task_list " and "
 	} elseif { $num != 1 } {
 	    append task_list ", "
