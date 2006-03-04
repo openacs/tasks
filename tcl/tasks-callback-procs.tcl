@@ -90,8 +90,9 @@ ad_proc -public tasks::workflow::impl::action_side_effect::do {
                mime_type, comment, status_id, priority,
 	       to_char((now()+ (start::varchar || ' days')::interval), 'YYYY-MM-DD') as start_date,
 	       to_char((now()+ (due::varchar || ' days')::interval), 'YYYY-MM-DD') as due_date
-	from t_process_tasks
-	where open_action_id = :action_id
+               from t_process_tasks
+         where open_action_id = :action_id
+           and status_id is not null
     }]
 
     foreach task $tasks {
