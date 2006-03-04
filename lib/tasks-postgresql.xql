@@ -2,6 +2,15 @@
 <queryset>
 <rdbms><type>postgresql</type><version>7.2</version></rdbms>
 
+<fullquery name="status_options">
+    <querytext>
+        select title, 
+               status_id
+          from t_task_status
+         order by status_id
+    </querytext>
+</fullquery>
+
 <fullquery name="task_available_for_action">
     <querytext>
         select '1'
@@ -67,9 +76,12 @@
           from t_task_status s,
                acs_objects ao,
                t_tasks t
+               left outer join t_process_instances pi on (pi.process_instance_id = t.process_instance_id)
+      	       left outer join t_processes p on (p.process_id = pi.process_id)
          where s.status_id = t.status_id
            and ao.object_id = t.task_id
         $limitations_clause
+        [list::filter_where_clauses -and -name tasks]
         [template::list::orderby_clause -orderby -name tasks]
     </querytext>
 </fullquery>

@@ -15,7 +15,6 @@
   </div>
 </if>
 <elseif @task_action@ eq add_process>
-
 <h3>#tasks.Assign_Process#</h3>
 <listtemplate name="processes"></listtemplate>
 <br />
@@ -24,7 +23,7 @@
 </elseif>
 <else>
 
- <if @single_object_p@ not nil>
+ <if @single_object_p@ true>
     <p>
      <a href="@add_url@" class="button">#tasks.Add_Task#</a>
      <a href="@add_process_url@" class="button">#tasks.Assign_Process#</a>

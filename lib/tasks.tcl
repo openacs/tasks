@@ -56,7 +56,7 @@ foreach {key value} $submitted_vars {
 	if { $key ne "return_url" } {
 	    lappend page_elements $key
 	}
-	if { [lsearch [list groupby orderby format page] $key] < 0 } {
+	if { [lsearch [list groupby orderby format page status_id] $key] < 0 } {
 	    # the variable is not a reserved filter name
 	    lappend filters_list $key {}
 	}
@@ -156,14 +156,12 @@ if { [info exists assignee_query] || [info exists assignee_ids] || [info exists 
 append limitations_clause "\n and ao.package_id = [ad_conn package_id]"
 
 if { $start_date ne "" } {
-    append limitations_clause "\n and t.due_date >= '$start_date'"
+    append limitations_clause "\n and CASE WHEN t.status_id <> '2' THEN t.due_date::date ELSE t.completed_date::date END >= '$start_date'::date"
 }
 
 if { $end_date ne "" } {
-    append limitations_clause "\n and t.due_date <= '$end_date'"
+    append limitations_clause "\n and CASE WHEN t.status_id <> '2' THEN t.due_date::date ELSE t.completed_date::date END <= '$end_date'::date"
 }
-
-
 
 
 
@@ -312,6 +310,12 @@ foreach element [list checkbox deleted_p priority title process_title object_nam
 }
 
 
+set status_options [db_list_of_lists status_options {}]
+set status_options [lang::util::localize $status_options]
+# by default we only show pending tasks
+lappend filters_list status_id [list label [_ tasks.Status] values $status_options where_clause { t.status_id = :status_id } default_value "1"]
+
+
 if { [lsearch $hide_elements checkbox] >= 0 } {
     set bulk_actions [list]
 } else {
@@ -337,6 +341,7 @@ template::list::create \
                 <else><a href="@tasks.complete_url@"><img src="/resources/acs-subsite/checkbox.gif" alt="[_ tasks.Not_Done]" border="0" height="13" width="13"></img></a></else>
 	    }
 	}
+	status_id {}
         priority {
 	    label "[_ tasks.Priority]"
 	    display_template {
@@ -445,8 +450,13 @@ db_multirow -extend {assignee_url assignee_name object_url complete_url done_p i
 
     set assignee_name [contact::name -party_id $assignee_id]
 
-    set object_url             "/o/$object_id"
-    set assignee_url           "/o/$assignee_id"
+    if { [ad_conn package_key] == "contacts" } {
+	set object_url             [contact::url -party_id $object_id]
+	set assignee_url           [contact::url -party_id $assignee_id]
+    } else {
+	set object_url             "/o/$object_id"
+	set assignee_url           "/o/$assignee_id"
+    }
     set task_url               [export_vars -base $url -url [concat $page_elements {{task_action_id $task_id} {task_action edit}}]]
     set complete_url           [export_vars -base $url -url [concat $page_elements {{task_action_id $task_id} {task_action complete}}]]
     set interval_increase_url  [export_vars -base $url -url [concat $page_elements {{task_action_id $task_id} {task_action interval_increase}}]]

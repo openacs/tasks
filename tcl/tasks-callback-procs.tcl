@@ -161,6 +161,7 @@ ad_proc -public -callback contacts::redirect -impl tasks {
 	    process-task-delete { set file "/packages/tasks/www/process-task-delete" }
             tasks { set file "/packages/tasks/www/index" }
 	    tasks-change-assignee { set file "/packages/tasks/www/change-assignee" }
+	    tasks-delete { set file "/packages/tasks/www/delete" }
 	}
 	if { [exists_and_not_null file] } {
 	    rp_internal_redirect $file

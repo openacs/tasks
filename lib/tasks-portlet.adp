@@ -12,7 +12,9 @@
 	        object_query=@object_query@
 		page_size="50" 
 		show_filters_p="1"
-                hide_elements="" />	
+                hide_elements=""
+                start_date=@start_date@
+                end_date=@end_date@ />	
         </td>
       </tr>
     </table>

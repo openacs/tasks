@@ -5,15 +5,10 @@ ad_page_contract {
     @creation-date 2004-07-28
     @cvs-id $Id$
 } {
-    {tasks_orderby:optional ""}
-    {format "normal"}
     {search_id:integer ""}
     {query ""}
-    {page:optional "1"}
-    {page_size:integer "25"}
     {tasks_future:integer "7"}
-    {tasks_previous:integer "0"}
-    {page_flush_p "0"}
+    {tasks_previous:integer ""}
 }
 
 
@@ -25,7 +20,6 @@ set package_id [ad_conn package_id]
 set url [ad_conn url]
 
 set return_url [export_vars -base $url -url {orderby format search_id query page page_size tasks_future tasks_previous {page_flush_p t}}]
-
 
 set package_id [site_node::get_element -url "/contacts" -element object_id]
 if { [exists_and_not_null search_id] } {
@@ -43,8 +37,8 @@ set form_elements {
     {search_id:integer(select),optional {label ""} {options $search_options} {html {onChange "javascript:acs_FormRefresh('search')"}}}
     {query:text(text),optional {label ""} {html {size 20 maxlength 255}}}
     {save:text(submit) {label {[_ contacts.Search]}} {value "go"}}
-    {tasks_previous:integer(text),optional {label "&nbsp;&nbsp;<span style=\"font-size: smaller;\">[_ tasks.View_previous]</span>"} {after_html "<span style=\"font-size: smaller;\">days"} {html {size 2 maxlength 3 onChange "javascript:acs_FormRefresh('search')"}}}
-    {tasks_future:integer(text),optional {label "&nbsp;&nbsp;<span style=\"font-size: smaller;\">[_ tasks.View_next]</span>"} {after_html "<span style=\"font-size: smaller;\">days"} {html {size 2 maxlength 3 onChange "javascript:acs_FormRefresh('search')"}}}
+    {tasks_previous:integer(text),optional {label "&nbsp;&nbsp;<span style=\"font-size: smaller;\">[_ tasks.View_previous]</span>"} {after_html "<span style=\"font-size: smaller;\">days</span>"} {html {size 2 maxlength 3 onChange "javascript:acs_FormRefresh('search')"}}}
+    {tasks_future:integer(text),optional {label "&nbsp;&nbsp;<span style=\"font-size: smaller;\">[_ tasks.View_next]</span>"} {after_html "<span style=\"font-size: smaller;\">days</span>"} {html {size 2 maxlength 3 onChange "javascript:acs_FormRefresh('search')"}}}
 }
 
 if { [parameter::get -boolean -parameter "ForceSearchBeforeAdd" -default "0"] } {
@@ -75,3 +69,14 @@ select parties.party_id
        and group_distinct_member_map.group_id in ('[join [contacts::default_groups] "','"]')
 [contact::search_clause -and -search_id $search_id -query $query -party_id "parties.party_id" -revision_id "revision_id"]
 "
+
+
+
+set start_date ""
+set end_date ""
+if { $tasks_future ne "" } {
+    set end_date [db_string get_new_start_date " select ( now() + '$tasks_future days'::interval ) " -default {}]
+}
+if { $tasks_previous ne "" } {
+    set start_date [db_string get_new_end_date " select ( now() - '$tasks_previous days'::interval ) " -default {}]
+}
