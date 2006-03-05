@@ -453,11 +453,13 @@ db_multirow -extend {assignee_url assignee_name object_url complete_url done_p i
     if { [ad_conn package_key] == "contacts" } {
 	set object_url             [contact::url -party_id $object_id]
 	set assignee_url           [contact::url -party_id $assignee_id]
+       	set task_url               [export_vars -base ${object_url}tasks -url [concat $page_elements {{task_action_id $task_id} {task_action edit}}]]
     } else {
 	set object_url             "/o/$object_id"
 	set assignee_url           "/o/$assignee_id"
+	set task_url               [export_vars -base $url -url [concat $page_elements {{task_action_id $task_id} {task_action edit}}]]
     }
-    set task_url               [export_vars -base $url -url [concat $page_elements {{task_action_id $task_id} {task_action edit}}]]
+
     set complete_url           [export_vars -base $url -url [concat $page_elements {{task_action_id $task_id} {task_action complete}}]]
     set interval_increase_url  [export_vars -base $url -url [concat $page_elements {{task_action_id $task_id} {task_action interval_increase}}]]
     set interval_decrease_url  [export_vars -base $url -url [concat $page_elements {{task_action_id $task_id} {task_action interval_decrease}}]]
