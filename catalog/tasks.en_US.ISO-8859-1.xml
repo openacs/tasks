@@ -7,6 +7,7 @@
   <msg key="Add_task_to">Add Task To</msg>
   <msg key="AddEdit">Add/Edit</msg>
   <msg key="Assign_Process">Assign Process</msg>
+  <msg key="Assign_to">Assign to</msg>
   <msg key="Assignee">Assignee</msg>
   <msg key="Cancel">Cancel</msg>
   <msg key="Cancel_do_not_delete">Cancel, do not delete</msg>
@@ -28,10 +29,12 @@
   <msg key="Have_they_responded">Have they responded?</msg>
   <msg key="if_blank_there_is_no">If blank there is no due date</msg>
   <msg key="Important">Important</msg>
+  <msg key="localization-d_far_fmt">%b [string trimleft %d 0], %Y</msg>
+  <msg key="localization-d_near_fmt">%b [string trimleft %d 0] (%a)</msg>
   <msg key="lt_Add_Task_and_Add_Anot">Add Task and Add Another</msg>
   <msg key="lt_Add_Task_save________">Add Task} save}
         {{&lt;#_ Add Task and Add Another</msg>
-  <msg key="lt_Are_you_sure_you_want">Are you sure you want to delete this process: %one_line%</msg>
+  <msg key="lt_Are_you_sure_you_want">Are you sure you want to delete this process: %process%</msg>
   <msg key="lt_Are_you_sure_you_want_1">Are you sure you want to delete %task2_pretty% ?</msg>
   <msg key="lt_Delete_from_Recruitin">Delete from Recruiting System</msg>
   <msg key="lt_Either_a_custom_task_">Either a custom task or standard task is required</msg>
@@ -84,10 +87,12 @@
   <msg key="Tasks_Instance">Tasks Instance %package_id%</msg>
   <msg key="these_tasks">these %num_entries% tasks</msg>
   <msg key="this_task">this task</msg>
+  <msg key="Tomorrow">Tomorrow</msg>
   <msg key="Update">Update</msg>
   <msg key="Very_Important">Very Important</msg>
   <msg key="View_next">View next</msg>
   <msg key="View_previous">View previous</msg>
   <msg key="Yes">Yes</msg>
+  <msg key="Yesterday">Yesterday</msg>
   <msg key="You_can_either_use">You can either use a standard task or a custom task, but not both</msg>
 </message_catalog>
