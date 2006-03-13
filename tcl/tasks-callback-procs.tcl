@@ -60,7 +60,8 @@ ad_proc -public -callback contacts::bulk_actions -impl tasks {
 } {
     Add task history to this party. Return as list
 } {
-    ::template::multirow append $multirow "[_ tasks.Add_Task]" "/tasks/task" "[_ tasks.Add_a_task_to_the]"
+    ::template::multirow append $multirow "[_ tasks.Add_Task]" "[ad_conn package_url]bulk-add-task" "[_ tasks.Add_a_task_to_the]"
+    ::template::multirow append $multirow "[_ tasks.Add_Process]" "[ad_conn package_url]bulk-add-process" "[_ tasks.Add_a_process_to_the]"
 }
 
 
@@ -160,6 +161,9 @@ ad_proc -public -callback contacts::redirect -impl tasks {
 	    process-delete { set file "/packages/tasks/www/process-delete" }
 	    process-task { set file "/packages/tasks/www/process-task" }
 	    process-task-delete { set file "/packages/tasks/www/process-task-delete" }
+            bulk-add-process { set file "/packages/tasks/lib/contacts-bulk-add-process" }
+            bulk-add-task { set file "/packages/tasks/lib/contacts-bulk-add-task" }
+            tasks-mail-merge { set file "/packages/tasks/lib/contacts-mail-merge" }
             tasks { set file "/packages/tasks/www/index" }
 	    tasks-change-assignee { set file "/packages/tasks/www/change-assignee" }
 	    tasks-delete { set file "/packages/tasks/www/delete" }

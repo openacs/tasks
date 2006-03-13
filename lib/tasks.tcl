@@ -241,10 +241,9 @@ if { $task_action ne "" && $task_action_id ne "" && [string is integer $task_act
 	} -filters {}
 
     db_multirow -extend { creator_url assign_url} -unclobber processes processes {} {
-	set creator_url "/o/$creation_user"
-
+	set creator_url [tasks::object_url -object_id $creation_user]
 	set assign_url [export_vars -base $url -url [concat $page_elements {process_id {task_action assign_process}}]]
-    }    
+    }
 
 } elseif { $task_action eq "assign_process" && [ns_queryget process_id] ne "" } {
     set process_id [ns_queryget process_id]
@@ -450,13 +449,11 @@ db_multirow -extend {assignee_url assignee_name object_url complete_url done_p i
 
     set assignee_name [contact::name -party_id $assignee_id]
 
+    set object_url             [tasks::object_url -object_id $object_id]
+    set assignee_url           [tasks::object_url -object_id $assignee_id]
     if { [ad_conn package_key] == "contacts" } {
-	set object_url             [contact::url -party_id $object_id]
-	set assignee_url           [contact::url -party_id $assignee_id]
        	set task_url               [export_vars -base ${object_url}tasks -url [concat $page_elements {{task_action_id $task_id} {task_action edit}}]]
     } else {
-	set object_url             "/o/$object_id"
-	set assignee_url           "/o/$assignee_id"
 	set task_url               [export_vars -base $url -url [concat $page_elements {{task_action_id $task_id} {task_action edit}}]]
     }
 

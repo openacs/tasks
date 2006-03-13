@@ -14,6 +14,17 @@ namespace eval tasks::process {}
 namespace eval tasks::process::task {}
 namespace eval tasks::process::instance {}
 
+ad_proc -public tasks::object_url {
+    {-object_id}
+} {
+    if { [ad_conn package_key] eq "contacts" } {
+	return [contact::url -party_id $object_id]
+    } else {
+	return "/o/${object_id}"
+    }
+
+}
+
 ad_proc -public tasks::require_belong_to_package {
     {-objects ""}
     {-package_id ""}
