@@ -2,13 +2,17 @@
 <message_catalog package_key="tasks" package_version="0.1d9" locale="en_US" charset="ISO-8859-1">
 
   <msg key="a_Task">a Task</msg>
+  <msg key="Add_a_process_to_the">Add a process to the selected contacts</msg>
   <msg key="Add_a_task_to_the">Add a task to the selected contacts</msg>
+  <msg key="Add_Process">Add Process</msg>
   <msg key="Add_Task">Add Task</msg>
   <msg key="Add_task_to">Add Task To</msg>
   <msg key="AddEdit">Add/Edit</msg>
   <msg key="Assign_Process">Assign Process</msg>
+  <msg key="Assign_process_to_the_following">Assign process to the following contacts:</msg>
   <msg key="Assign_to">Assign to</msg>
   <msg key="Assignee">Assignee</msg>
+  <msg key="Assigning_-process-">Assigning &quot;%process%&quot;</msg>
   <msg key="Cancel">Cancel</msg>
   <msg key="Cancel_do_not_delete">Cancel, do not delete</msg>
   <msg key="Change_Assignee">Change Assignee</msg>
@@ -36,6 +40,7 @@
         {{&lt;#_ Add Task and Add Another</msg>
   <msg key="lt_Are_you_sure_you_want">Are you sure you want to delete this process: %process%</msg>
   <msg key="lt_Are_you_sure_you_want_1">Are you sure you want to delete %task2_pretty% ?</msg>
+  <msg key="lt_Assigning_-process-_to_-assignees-">Assinging &quot;%process%&quot; to: %assignees%</msg>
   <msg key="lt_Delete_from_Recruitin">Delete from Recruiting System</msg>
   <msg key="lt_Either_a_custom_task_">Either a custom task or standard task is required</msg>
   <msg key="lt_Originally_created_by">Originally created by &lt;a href=\&quot;%creator_url%\&quot;&gt;%creator_name%&lt;/a&gt;</msg>
@@ -62,6 +67,7 @@
   <msg key="Organization">Organization</msg>
   <msg key="Priority">Priority</msg>
   <msg key="Process">Process</msg>
+  <msg key="Process_id_not_valid">The process_id specified is not valid</msg>
   <msg key="Processes">Processes</msg>
   <msg key="Reassign">Reassign</msg>
   <msg key="Reassign_selected">Reassign Selected Tasks</msg>
