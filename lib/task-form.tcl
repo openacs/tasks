@@ -129,21 +129,27 @@ set form_elements {
 
 
 
-
+if { ![exists_and_not_null standard_tasks_list] } {
+    set params [split [parameter::get -parameter DefaultTasks -default ""] ";"] 
+    set standard_tasks_list [list [list "" ""]]
+    foreach param $params {
+	set param [string trim $param]
+	set param_tran [_ $param]
+	if { ![string match "MESSAGE KEY MISSING*" $param_tran] } {
+	    set param $param_tran
+	}
+	lappend standard_tasks_list [list $param $param]
+    }
+}
 if { [exists_and_not_null standard_tasks_list] } {
 
     # the calling package has provided a list of default tasks
     # to use for this package. Thus we set up a standard task list
-    set params [split [parameter::get -parameter DefaultTasks -default ""] ";"] 
-    set opts [list [list "" ""]]
-    foreach param $params {
-	lappend opts [list [_ $param] [_ $param]]
-    }
 
     append form_elements {
         {task_prescribed:text(select),optional
             {label "[_ tasks.Standard_Task]"}
-	    {options $opts}
+	    {options $standard_tasks_list}
 	}
         {task:text(text),optional
             {label "[_ tasks.Custom_Task]"}
