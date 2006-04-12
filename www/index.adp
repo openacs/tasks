@@ -9,7 +9,8 @@
 	<include src="/packages/tasks/lib/tasks-portlet"
                  object_query=@object_query;noquote@ 
                  start_date=@start_date@
-                 end_date=@end_date@ />
+                 end_date=@end_date@
+                 assignee_query=@assignee_query@ />xo
 
     </td>
 </tr>

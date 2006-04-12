@@ -13,6 +13,7 @@ ad_page_contract {
     {query ""}
     {tasks_future:integer "7"}
     {tasks_previous:integer ""}
+    {selected_assignee_id ""}
 }
 
 
@@ -24,7 +25,7 @@ set package_id [ad_conn package_id]
 set url [ad_conn url]
 
 set return_url [export_vars -base $url -url {orderby format search_id query page page_size tasks_future tasks_previous {page_flush_p t}}]
-
+set assignee_query " select user_id from users "
 set package_id [site_node::get_element -url "/contacts" -element object_id]
 if { [exists_and_not_null search_id] } {
     contact::search::log -search_id $search_id
@@ -54,7 +55,7 @@ if { [parameter::get -boolean -parameter "ForceSearchBeforeAdd" -default "0"] } 
     }
 }
 
-ad_form -name "search" -method "GET" -export {status_id tasks_orderby page format} -form $form_elements \
+ad_form -name "search" -method "GET" -export {selected_assignee_id status_id tasks_orderby page format} -form $form_elements \
     -on_request {
     } -edit_request {
     } -on_refresh {

@@ -128,30 +128,6 @@ if { [info exists object_ids] } {
 
 append limitations_clause "\n and t.object_id in ( $object_query )"
 
-# you may specify a list of assignees as well if you like, they are similar to the object
-# queries and ids this is not required. You may only specify one of the following, assignee_query, assignee_ids, assignee_id
-
-if { [info exists assignee_query] || [info exists assignee_ids] || [info exists assignee_id] } {
-    if {
-	( [info exists assignee_query] && ![info exists assignee_ids] && ![info exists assignee_id] ) ||
-	( ![info exists assignee_query] && [info exists assignee_ids] && ![info exists assignee_id] ) ||
-	( ![info exists assignee_query] && [info exists assignee_ids] && ![info exists assignee_id] ) 
-    } {
-	# we only have one provided object_id list, this is correct set up
-    } else {
-	error "packages/tasks/lib/tasks - invalid include you must specify one (and only one) of the following: assignee_query, assignee_ids, assignee_id"
-    }
-
-    if { [info exists assignee_ids] } {
-	set assignee_query [template::util::tcl_to_sql_list $object_ids]
-    } elseif { [info exists object_id] } {
-	set assignee_query '$object_id'
-    }
-
-    if { [exists_and_not_null assignee_query] } {
-	append limitations_clause "\n and t.assignee_id in ( $assignee_query )"
-    }
-}
 
 append limitations_clause "\n and ao.package_id = [ad_conn package_id]"
 
@@ -294,6 +270,50 @@ if { [string is true $show_form_p] } {
 
 
 
+# you may specify a list of assignees as well if you like, they are similar to the object
+# queries and ids this is not required. You may only specify one of the following, assignee_query, assignee_ids, assignee_id
+if { [info exists assignee_query] || [info exists assignee_ids] || [info exists assignee_id] } {
+    if {
+	( [info exists assignee_query] && ![info exists assignee_ids] && ![info exists assignee_id] ) ||
+	( ![info exists assignee_query] && [info exists assignee_ids] && ![info exists assignee_id] ) ||
+	( ![info exists assignee_query] && [info exists assignee_ids] && ![info exists assignee_id] ) 
+    } {
+	# we only have one provided object_id list, this is correct set up
+    } else {
+	error "packages/tasks/lib/tasks - invalid include you must specify one (and only one) of the following: assignee_query, assignee_ids, assignee_id"
+    }
+
+    if { [info exists assignee_query] || [info exists assignee_ids] } {
+	# the users should be able to select from a list of assignees
+	if { ![info exists assignee_query] } {
+	    set assignee_query [template::util::tcl_to_sql_list $assignee_ids]
+	}
+	set package_id [ad_conn package_id]
+	set selected_assignee_id [ns_queryget selected_assignee_id]
+	set assignees [db_list_of_lists get_them " select contact__name( party_id ),
+                                                          party_id
+                                                     from parties
+                                                    where party_id in ( $assignee_query )
+                                                      and party_id in (
+            select t_tasks.assignee_id
+              from t_tasks
+             where t_tasks.object_id in ( $object_query ))"]
+	set filters_list [list selected_assignee_id [list label [_ tasks.Assignee] values [concat [list [list "- - - -" ""]] $assignees]]]
+    }
+    if { [exists_and_not_null selected_assignee_id] } {
+	set assignee_query '${selected_assignee_id}'
+    } else {
+	if { [info exists assignee_ids] } {
+	    set assignee_query [template::util::tcl_to_sql_list $assignee_ids]
+	} elseif { [info exists assignee_id] } {
+	    set assignee_query '$assignee_id'
+	}
+    }
+
+    if { [exists_and_not_null assignee_query] } {
+	append limitations_clause "\n and t.assignee_id in ( $assignee_query )"
+    }
+}
 
 
 
@@ -314,7 +334,7 @@ set status_options [lang::util::localize $status_options]
 # by default we only show pending tasks
 lappend filters_list status_id [list label [_ tasks.Status] values $status_options where_clause { t.status_id = :status_id } default_value "1"]
 
-
+#lappend filters_list 
 if { [lsearch $hide_elements checkbox] >= 0 } {
     set bulk_actions [list]
 } else {
