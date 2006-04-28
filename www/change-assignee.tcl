@@ -10,8 +10,9 @@ ad_page_contract {
     {return_url ""}
 }
 
-tasks::require_belong_to_package -objects $task_id
-
+foreach id $task_id {
+    tasks::require_belong_to_package -objects $id
+}
 set required_p 0
 
 if { ![exists_and_not_null task_id] } {
