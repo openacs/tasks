@@ -107,7 +107,8 @@ ad_proc -public tasks::install::after_upgrade {
                     # in the 1.2b3 or before setup. Thus we get the package_id of the contacts
                     # instance.
 
-                    set contacts_package_id [site_node::get_from_object_id -object_id [site_node::get_from_url -url "/contacts/" -exact]]
+#                    set contacts_package_id [site_node::get_from_object_id -object_id [site_node::get_from_url -url "/contacts/" -exact]]
+                    set contacts_package_id [apm_package_id_from_key "contacts"]
 		    if { ![exists_and_not_null contacts_package_id] } {
 			error "Cannot upgrade from 0.1d9 because there are tasks assigned to this package, but there is no contacts instance mounted at /contacts/"
 		    } else {
@@ -124,7 +125,7 @@ ad_proc -public tasks::install::after_upgrade {
 		    }
 
                     # now we unmount the tasks instance (since this is now a service that does not need to be mounted)
-                    site_node_delete_package_instance -node_id [site_node::get_from_object_id -object_id $tasks_package_id]
+#                    site_node_delete_package_instance -node_id [site_node::get_from_object_id -object_id $tasks_package_id]
 		    
 		}
 
