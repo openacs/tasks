@@ -16,9 +16,16 @@ namespace eval tasks::process::instance {}
 
 ad_proc -public tasks::object_url {
     {-object_id}
+    {-package_id ""}
 } {
-    if { [ad_conn package_key] eq "contacts" } {
-	return [contact::url -party_id $object_id]
+    if { $package_id ne "" } {
+        set package_key [apm_package_key_from_id $package_id]
+    } else {
+        set package_key [ad_conn package_key]
+        set package_id [ad_conn package_id]
+    }
+    if { $package_key eq "contacts" } {
+	return [contact::url -party_id $object_id -package_id $package_id]
     } else {
 	return "/o/${object_id}"
     }
