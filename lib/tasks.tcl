@@ -20,11 +20,15 @@
 # tasks_previous Filter for tasks in the past in days
 # tasks_future   Filter for tasks in the future in days
 # status_id ...
+
 # hide_elements  List the template::list elements you don't want displated. if checkbox is listed bulk actions will be disabled for this include
 
 set url [ad_conn url]
-
-set optional_params {start_date end_date page_size hide_elements}
+if { ![exists_and_not_null package_id] } { 
+    set package_id [ad_conn package_id]
+}
+set package_url [apm_package_url_from_id $package_id]
+set optional_params {start_date end_date page_size hide_elements default_assignee_id}
 set required_params {object_query object_ids object_id assignee_query assignee_ids assignee_id}
 set special_params {task_action_id task_action party_id process_id}
 set ad_form_params {__confirmed_p __refreshing_p __key_signature __new_p}
@@ -37,7 +41,7 @@ foreach {key value} $submitted_vars {
     # we only pass on vars that cannot be submitted by the include
     # this way somebody cannot pass a variable via the http request
     # what is hard coded by the include by the programmer
-    if { [lsearch [concat $optional_params $required_params $special_params $ad_form_params $task_form_vars] $key] < 0 && [string is false [regexp {^formbutton:} $key match]] } {
+    if { [lsearch [concat $required_params $special_params $ad_form_params $task_form_vars] $key] < 0 && [string is false [regexp {^formbutton:} $key match]] } {
 	# the variable is not expected to be submitted via
         # the include statement, so we can set this variable
 	
@@ -63,8 +67,9 @@ foreach {key value} $submitted_vars {
     }
 }
 
-
-set return_url [export_vars -base $url -url $page_elements]
+if { ![exists_and_not_null return_url] } {
+    set return_url [export_vars -base $url -url $page_elements]
+}
 set add_url [export_vars -base $url -url [concat $page_elements {{task_action add}}]]
 set add_process_url [export_vars -base $url -url [concat $page_elements {{task_action add_process}}]]
 
@@ -81,7 +86,7 @@ foreach page_element [concat $page_elements $special_params] {
 }
 
 
-if { [exists_and_not_null page_size] } {
+if { ![exists_and_not_null page_size] } {
     # The default page size for tasks
     set page_size "25"
 }
@@ -129,7 +134,7 @@ if { [info exists object_ids] } {
 append limitations_clause "\n and t.object_id in ( $object_query )"
 
 
-append limitations_clause "\n and ao.package_id = [ad_conn package_id]"
+append limitations_clause "\n and ao.package_id = $package_id"
 
 if { $start_date ne "" } {
     append limitations_clause "\n and CASE WHEN t.status_id <> '2' THEN t.due_date::date ELSE t.completed_date::date END >= '$start_date'::date"
@@ -276,7 +281,7 @@ if { [info exists assignee_query] || [info exists assignee_ids] || [info exists 
     if {
 	( [info exists assignee_query] && ![info exists assignee_ids] && ![info exists assignee_id] ) ||
 	( ![info exists assignee_query] && [info exists assignee_ids] && ![info exists assignee_id] ) ||
-	( ![info exists assignee_query] && [info exists assignee_ids] && ![info exists assignee_id] ) 
+	( ![info exists assignee_query] && ![info exists assignee_ids] && [info exists assignee_id] ) 
     } {
 	# we only have one provided object_id list, this is correct set up
     } else {
@@ -288,7 +293,6 @@ if { [info exists assignee_query] || [info exists assignee_ids] || [info exists 
 	if { ![info exists assignee_query] } {
 	    set assignee_query [template::util::tcl_to_sql_list $assignee_ids]
 	}
-	set package_id [ad_conn package_id]
 	set selected_assignee_id [ns_queryget selected_assignee_id]
 	set assignees [db_list_of_lists get_them " select contact__name( party_id ),
                                                           party_id
@@ -298,7 +302,9 @@ if { [info exists assignee_query] || [info exists assignee_ids] || [info exists 
             select t_tasks.assignee_id
               from t_tasks
              where t_tasks.object_id in ( $object_query ))"]
-	set filters_list [list selected_assignee_id [list label [_ tasks.Assignee] values [concat [list [list "- - - -" ""]] $assignees]]]
+	set filters_list [concat $filters_list [list selected_assignee_id [list label [_ tasks.Assignee] values [concat [list [list "- - - -" ""]] $assignees]]]]
+    } else {
+        set selected_assignee_id $assignee_id
     }
     if { [exists_and_not_null selected_assignee_id] } {
 	set assignee_query '${selected_assignee_id}'
@@ -314,7 +320,6 @@ if { [info exists assignee_query] || [info exists assignee_ids] || [info exists 
 	append limitations_clause "\n and t.assignee_id in ( $assignee_query )"
     }
 }
-
 
 
 
@@ -338,9 +343,10 @@ lappend filters_list status_id [list label [_ tasks.Status] values $status_optio
 if { [lsearch $hide_elements checkbox] >= 0 } {
     set bulk_actions [list]
 } else {
-    set bulk_actions [list "[_ tasks.Change_Assignee]" "tasks-change-assignee" "[_ tasks.Change_Assignee]"]
-    lappend bulk_actions "[_ tasks.Delete]" "tasks-delete" "[_ tasks.Delete]"
+    set bulk_actions [list "[_ tasks.Change_Assignee]" "${package_url}tasks-change-assignee" "[_ tasks.Change_Assignee]"]
+    lappend bulk_actions "[_ tasks.Delete]" "${package_url}tasks-delete" "[_ tasks.Delete]"
 }
+
 template::list::create \
     -name tasks \
     -multirow tasks \
@@ -469,12 +475,12 @@ db_multirow -extend {assignee_url assignee_name object_url complete_url done_p i
 
     set assignee_name [contact::name -party_id $assignee_id]
 
-    set object_url             [tasks::object_url -object_id $object_id]
-    set assignee_url           [tasks::object_url -object_id $assignee_id]
-    if { [ad_conn package_key] == "contacts" } {
-       	set task_url               [export_vars -base ${object_url}tasks -url [concat $page_elements {{task_action_id $task_id} {task_action edit}}]]
+    set object_url             [tasks::object_url -object_id $object_id -package_id $package_id]
+    set assignee_url           [tasks::object_url -object_id $assignee_id -package_id $package_id]
+    if { [apm_package_key_from_id $package_id] == "contacts" } {
+       	set task_url               [export_vars -base ${object_url}tasks -url [concat $page_elements {{task_action_id $task_id} {task_action edit} return_url}]]
     } else {
-	set task_url               [export_vars -base $url -url [concat $page_elements {{task_action_id $task_id} {task_action edit}}]]
+	set task_url               [export_vars -base $url -url [concat $page_elements {{task_action_id $task_id} {task_action edit} return_url}]]
     }
 
     set complete_url           [export_vars -base $url -url [concat $page_elements {{task_action_id $task_id} {task_action complete}}]]
