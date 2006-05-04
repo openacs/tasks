@@ -9,7 +9,7 @@
         <td>
 	     <include
         	src="/packages/tasks/lib/tasks"
-	        object_query=@object_query@
+	        object_query="@object_query@"
 		page_size="50" 
 		show_filters_p="1"
                 hide_elements=""

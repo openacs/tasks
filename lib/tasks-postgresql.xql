@@ -65,6 +65,7 @@
       	       left outer join t_processes p on (p.process_id = pi.process_id)
       	 where s.status_id = t.status_id
            and ao.object_id = t.task_id
+        $limitations_clause
     	[template::list::page_where_clause -and -name tasks -key t.task_id]
      	[template::list::orderby_clause -orderby -name tasks]
     </querytext>
@@ -81,7 +82,7 @@
          where s.status_id = t.status_id
            and ao.object_id = t.task_id
         $limitations_clause
-        [list::filter_where_clauses -and -name tasks]
+        [template::list::filter_where_clauses -and -name tasks]
         [template::list::orderby_clause -orderby -name tasks]
     </querytext>
 </fullquery>
