@@ -73,7 +73,7 @@ ad_proc -public tasks::workflow::impl::action_side_effect::do {
 } {
     create new tasks linked to this action
 } {
-    ns_log notice "\#\#\# entering tasks-action-callback: $case_id, $object_id, $action_id"
+    ns_log Debug "\#\#\# entering tasks-action-callback: $case_id, $object_id, $action_id"
 
     db_1row process_id {
 	select tp.process_instance_id,
@@ -153,7 +153,7 @@ ad_proc -public -callback contacts::redirect -impl tasks {
 
     } 
     if  { [regexp "^[ad_conn package_url](.*)$" [ad_conn url] match url_request] } {
-	ns_log notice "tasks implementation of contact::redirecturl_request $url_request"
+	ns_log Debug "tasks implementation of contact::redirecturl_request $url_request"
 	switch $url_request {
 	    processes { set file "/packages/tasks/www/processes" }
 	    process { set file "/packages/tasks/www/process" }
