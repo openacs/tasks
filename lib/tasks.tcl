@@ -326,7 +326,7 @@ if { [info exists assignee_query] || [info exists assignee_ids] || [info exists 
 
 
 set row_list [list]
-foreach element [list checkbox deleted_p priority title process_title object_name date assignee] {
+foreach element [list checkbox deleted_p priority title process_title object_name employer_name date assignee] {
     if { $single_object_p && $element == "object_name" } {	
     } elseif { [lsearch $hide_elements $element] < 0 } {
 	lappend row_list $element {}
@@ -399,6 +399,10 @@ template::list::create \
 	    label "[_ tasks.Contact]"
 	    link_url_eval $object_url
 	} 
+        employer_name {
+	    label "[_ contacts.Customer]"
+	    link_url_eval $object_url
+	} 
         date {
 	    label "[_ tasks.Date]"
 	    display_template {
@@ -468,13 +472,14 @@ template::list::create \
     }
 
 
-db_multirow -extend {assignee_url assignee_name object_url complete_url done_p interval_increase_url interval_decrease_url description_html task_url} -unclobber tasks tasks {} {
+db_multirow -extend {assignee_url assignee_name employer_name object_url complete_url done_p interval_increase_url interval_decrease_url description_html task_url} -unclobber tasks tasks {} {
 
     set due_date [tasks::relative_date -date $due_date]
     set completed_date [tasks::relative_date -date $completed_date]
 
     set assignee_name [contact::name -party_id $assignee_id]
-
+    set employer_name [lindex [lindex [contact::util::get_employers -employee_id $object_id] 0] 1]
+    
     set object_url             [tasks::object_url -object_id $object_id -package_id $package_id]
     set assignee_url           [tasks::object_url -object_id $assignee_id -package_id $package_id]
     if { [apm_package_key_from_id $package_id] == "contacts" } {
