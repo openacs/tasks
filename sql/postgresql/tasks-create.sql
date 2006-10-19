@@ -126,7 +126,8 @@ create table t_tasks (
 	assignee_id             integer
 );
 
-
+ create index t_tasks_assignee_status_idx on t_tasks(assignee_id,status_id);
+ create index t_tasks_object_idx on t_tasks(object_id);
 
 
 

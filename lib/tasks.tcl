@@ -131,7 +131,9 @@ if { [info exists object_ids] } {
     set object_query '$object_id'
 }
 
-append limitations_clause "\n and t.object_id in ( $object_query )"
+if {![string eq $object_query ""]} {
+    append limitations_clause "\n and t.object_id in ( $object_query )"
+}
 
 
 append limitations_clause "\n and ao.package_id = $package_id"
@@ -445,12 +447,6 @@ template::list::create \
             orderby_asc "lower(t.title) asc, t.priority desc, t.due_date asc"
             default_direction asc
         }
-        process_title {
-	    label "[_ tasks.Process]"
-            orderby_desc "lower(p.title) desc, t.priority desc, t.due_date asc"
-            orderby_asc "lower(p.title) asc, t.priority desc, t.due_date asc"
-	    default_direction asc
-	}
 	contact_name {
 	    label "[_ tasks.Created_By]"
             orderby_desc "lower(contact__name(t.party_id)) desc, t.due_date asc, t.priority, lower(t.title)"
