@@ -14,7 +14,6 @@ foreach required_param $required_params {
     }
 }
 
-
 # export_vars_list is a tcl list of key value that need
 # to be submitted with the form so that the page that
 # includes the tasks is displayed correctly when we
@@ -55,6 +54,8 @@ set object_count [llength $object_id]
 # due to its use of all form vars, thus we need
 # to find out if this is an edit request or not
 # by checking if the task_id object exists
+
+set show_form 1
 
 if { ![info exists task_id] } {
     set task_action "add"
@@ -194,10 +195,9 @@ append form_elements {
     }
 }
 
-#ad_return_error "ASD" [lsort -unique [concat [list return_url object_id task_action task_action_id task_form_vars] $export_vars_list]]
 
 ad_form \
-    -name add_edit \
+    -name add_edit_task \
     -cancel_url $return_url \
     -cancel_label "[_ tasks.Cancel]" \
     -edit_buttons $edit_buttons \
@@ -216,7 +216,7 @@ ad_form \
 	set title $task
 	set context [list $title]
 	set task_prescribed_p 0
-	foreach task_prescribed_option [template::element::get_property add_edit task_prescribed options] {
+	foreach task_prescribed_option [template::element::get_property add_edit_task task_prescribed options] {
 	    if { [lindex $task_prescribed_option 0] == $task } {
 		set task_prescribed_p 1
 	    }
@@ -232,6 +232,10 @@ ad_form \
 #	{end_date {[calendar::date_valid_p -date $end_date]} {This is not a valid date. Either the date doesn't exist or it is not formatted correctly. Correct formatting is: YYYY-MM-DD or YYYYMMDD}}
 	{task { [string equal [string trim $task] {}] != [string equal [string trim $task_prescribed] {}] } {[_ tasks.lt_Either_a_custom_task_]}}
     } -on_submit {
+	
+	if {$task eq ""} {
+	    set task $task_prescribed
+	}
 
 	# we don't use new_data and edit_data blocks because otherwise the save_add_another
         # gets messed up if we are adding a second task
@@ -239,6 +243,10 @@ ad_form \
 	if { ![db_0or1row get_it { select 1 from acs_objects where object_id = :task_id }] } {
 
 	    foreach object $object_id {
+
+		if {$assignee_id eq $object_id} {
+		    set assignee_id [ad_conn user_id]
+		}
 		set task_id [tasks::task::new \
 				 -title ${task} \
 				 -description ${description} \
@@ -248,6 +256,7 @@ ad_form \
 				 -due_date ${due_date} \
 				 -status_id ${status} \
 				 -package_id ${package_id} \
+				 -assignee_id ${assignee_id} \
 				 -priority ${priority}]
 	    }
 
@@ -271,7 +280,7 @@ ad_form \
 			     -priority ${priority} \
 			     -assignee_id ${assignee_id}]
 
-	    set task_url [export_vars -base task -url {task_id return_url}]
+	    set task_url [export_vars -base [ad_conn url] -url {task_id return_url}]
 	    set title $task
 	    util_user_message -html -message "[_ tasks.lt_The_task_a_hreftaskst_1]"
 
@@ -279,34 +288,19 @@ ad_form \
 
     } -after_submit {
 	if { [ns_queryget "formbutton:save_add_another"] != "" } {
-	    template::element::set_value add_edit task_prescribed ""
-	    template::element::set_value add_edit task ""
-	    template::element::set_value add_edit comment ""
-	    template::element::set_value add_edit due_date ""
-	    template::element::set_value add_edit status "1"
-	    template::element::set_value add_edit priority "1"
-	    template::element::set_value add_edit description ""
-	    template::element::set_value add_edit comment ""
+	    template::element::set_value add_edit_task task_prescribed ""
+	    template::element::set_value add_edit_task task ""
+	    template::element::set_value add_edit_task comment ""
+	    template::element::set_value add_edit_task due_date ""
+	    template::element::set_value add_edit_task status "1"
+	    template::element::set_value add_edit_task priority "1"
+	    template::element::set_value add_edit_task description ""
+	    template::element::set_value add_edit_task comment ""
+	    set show_form 1
 	} else {
-	    ad_returnredirect $return_url
-	    ad_script_abort
+	    set show_form 0
 	}
     }
 
-if { $task_action eq "edit" } {
-    set creation_id [db_string get_it { }]
-    set creator_url [contact::url -party_id $creation_id]
-    set creator_name [contact::name -party_id $creation_id]
-    template::element::create add_edit creator \
-	-datatype "text" \
-	-widget "inform" \
-	-label "" \
-	-value "[_ tasks.lt_Originally_created_by]" \
-	-optional
-} else {
-    if { $object_count > 1 } {
-	template::element::set_properties add_edit names widget inform
-    }
-}
 
 ad_return_template

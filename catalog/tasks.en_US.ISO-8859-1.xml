@@ -49,6 +49,7 @@
   <msg key="lt_Standard_tasks_are_ca">Standard tasks are cannot be used in conjunction with custom tasks</msg>
   <msg key="lt_The_task_a_hreftaskst">The task &lt;a href=&quot;/tasks/%task_url%&quot;&gt;%task%&lt;/a&gt; was added</msg>
   <msg key="lt_The_task_a_hreftaskst_1">The task &lt;a href=&quot;/tasks/%task_url%&quot;&gt;%title%&lt;/a&gt; was updated</msg>
+  <msg key="lt_The_task_lindex_task_">(The task lindex task)</msg>
   <msg key="lt_The_task_task_was_add">The task &quot;%task%&quot; was added to %names%</msg>
   <msg key="lt_The_task_was">The task &quot;%task_title%&quot; was deleted</msg>
   <msg key="lt_The_tasks_task_list_w">The tasks %task_list% were deleted</msg>

@@ -27,6 +27,8 @@ set url [ad_conn url]
 if { ![exists_and_not_null package_id] } { 
     set package_id [ad_conn package_id]
 }
+if { ![info exists assignee_id] } { set assignee_id {} }
+
 set package_url [apm_package_url_from_id $package_id]
 set optional_params {start_date end_date page_size hide_elements default_assignee_id}
 set required_params {object_query object_ids object_id assignee_query assignee_ids assignee_id}
@@ -311,9 +313,9 @@ if { [info exists assignee_query] || [info exists assignee_ids] || [info exists 
     if { [exists_and_not_null selected_assignee_id] } {
 	set assignee_query '${selected_assignee_id}'
     } else {
-	if { [info exists assignee_ids] } {
+	if { [exists_and_not_null assignee_ids] } {
 	    set assignee_query [template::util::tcl_to_sql_list $assignee_ids]
-	} elseif { [info exists assignee_id] } {
+	} elseif { [exists_and_not_null assignee_id] } {
 	    set assignee_query '$assignee_id'
 	}
     }

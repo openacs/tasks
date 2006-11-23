@@ -15,7 +15,8 @@
                 hide_elements=""
                 start_date=@start_date@
                 end_date=@end_date@
-                assignee_query=@assignee_query@ />	
+		assignee_id=@assignee_id@
+		/>
         </td>
       </tr>
     </table>

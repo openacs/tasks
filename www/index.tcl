@@ -25,7 +25,7 @@ set package_id [ad_conn package_id]
 set url [ad_conn url]
 
 set return_url [export_vars -base $url -url {orderby format search_id query page page_size tasks_future tasks_previous {page_flush_p t}}]
-set assignee_query " select user_id from users "
+
 set package_id [site_node::get_element -url "/contacts" -element object_id]
 if { [exists_and_not_null search_id] } {
     contact::search::log -search_id $search_id
@@ -33,10 +33,30 @@ if { [exists_and_not_null search_id] } {
 set search_options [concat [list [list [_ contacts.All_Contacts] ""]] [db_list_of_lists dbqd.contacts.www.index.public_searches {}]]
 
 set searchcount 1
-db_foreach dbqd.contacts.www.index.my_recent_searches {} {
-    lappend search_options [list "${searchcount}) ${recent_title}" ${recent_search_id}]
+db_foreach dbqd.contacts.www.index.my_searches {} {
+    lappend search_options [list "${my_searches_title}" ${my_searches_search_id} [_ contacts.My_Searches]]
     incr searchcount
 }
+db_foreach dbqd.contacts.www.index.my_lists {} {
+    lappend search_options [list "${my_lists_title}" ${my_lists_list_id} [_ contacts.Lists]]
+    incr searchcount
+}
+
+if { [exists_and_not_null search_id] } {
+    set search_in_list_p 0
+    foreach search_option $search_options {
+	if { [lindex $search_option 1] eq $search_id } {
+	    set search_in_list_p 1
+	}
+    }
+    if { [string is false $search_in_list_p] } {
+	set search_options [concat [list [list "&lt;&lt; [_ contacts.Search] \#${search_id} &gt;&gt;" $search_id]] $search_options]
+    }
+}
+
+
+lang::util::localize_list_of_lists -list $search_options
+
 
 set form_elements {
     {search_id:integer(select),optional {label ""} {options $search_options} {html {onChange "javascript:acs_FormRefresh('search')"}}}
