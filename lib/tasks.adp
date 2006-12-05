@@ -31,7 +31,8 @@
   </if>
 
 </else>
-	     <include
+ <listtemplate name="tasks"></listtemplate>	
+<!--     <include
         	src="/packages/tasks/lib/tasks-list"
 	        object_query=@object_query@
                 package_id="@package_id@"
@@ -41,4 +42,4 @@
 		show_filters_p="@show_filters_p@"
                 hide_elements=@hide_elements@ />	
 
-
+-->
