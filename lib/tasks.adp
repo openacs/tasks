@@ -32,14 +32,3 @@
 
 </else>
  <listtemplate name="tasks"></listtemplate>	
-<!--     <include
-        	src="/packages/tasks/lib/tasks-list"
-	        object_query=@object_query@
-                package_id="@package_id@"
-        	hide_form_p="t" 
-		assignee_id="@assignee_id@"
-		page_size="@page_size@" 
-		show_filters_p="@show_filters_p@"
-                hide_elements=@hide_elements@ />	
-
--->
