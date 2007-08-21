@@ -17,7 +17,7 @@ create table t_processes (
         mime_type                       varchar(200) default 'text/plain',
         workflow_id                     integer
                                         constraint t_process_workflow_fk
-                                        references workflows
+                                        references workflows,
         -- the user assigned to this process
 	assignee_id                     integer
 );
@@ -139,8 +139,8 @@ AS 'declare
        PERFORM
 	    acs_object_type__create_type(
 		''tasks_task'',	-- object_type
-		''Task'',	-- pretty_name
-		''Tasks'',	-- pretty_plural
+		''#tasks.Task#'',	-- pretty_name
+		''#tasks.Tasks#'',	-- pretty_plural
 		''acs_object'',	-- supertype
 		''t_tasks'',	-- table_name
 		''task_id'',	-- id_column
@@ -153,8 +153,8 @@ AS 'declare
        PERFORM
 	    acs_object_type__create_type(
 		''tasks_process'',	-- object_type
-		''Task Process'',	-- pretty_name
-		''Task Processes'',	-- pretty_plural
+		''#tasks.Task_Process#'',	-- pretty_name
+		''#tasks.Task_Processes#'',	-- pretty_plural
 		''acs_object'',		-- supertype
 		''t_processes'',	-- table_name
 		''process_id'',		-- id_column
@@ -167,8 +167,8 @@ AS 'declare
        PERFORM
 	    acs_object_type__create_type(
 		''tasks_process_instance'',	-- object_type
-		''Task Process Instance'',	-- pretty_name
-		''Task Process Instances'',	-- pretty_plural
+		''#tasks.Task_Process_Instance#'',	-- pretty_name
+		''#tasks.Task_Process_Instances#'',	-- pretty_plural
 		''acs_object'',			-- supertype
 		''t_process_instances'',	-- table_name
 		''process_instance_id'',	-- id_column
@@ -181,8 +181,8 @@ AS 'declare
        PERFORM
 	    acs_object_type__create_type(
 		''tasks_process_task'',	-- object_type
-		''Process Task'',	-- pretty_name
-		''Process Tasks'',	-- pretty_plural
+		''#tasks.Process_Task#'',	-- pretty_name
+		''#tasks.Process_Tasks#'',	-- pretty_plural
 		''acs_object'',		-- supertype
 		''t_process_tasks'',	-- table_name
 		''task_id'',		-- id_column
