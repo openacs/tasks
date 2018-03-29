@@ -40,7 +40,7 @@ ad_proc -public tasks::require_belong_to_package {
 	set package_id [ad_conn package_id]
     }
     if { ![tasks::belong_to_package -objects $objects -package_id $package_id] } {
-	ad_return_complain 1 [_ tasks.Your_submission_is_not_valid]
+	ad_return_complaint 1 [_ tasks.Your_submission_is_not_valid]
     }
 
 }
