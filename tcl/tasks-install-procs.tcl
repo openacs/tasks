@@ -125,7 +125,7 @@ ad_proc -public tasks::install::after_upgrade {
 		    }
 
                     # now we unmount the tasks instance (since this is now a service that does not need to be mounted)
-#                    site_node_delete_package_instance -node_id [site_node::get_from_object_id -object_id $tasks_package_id]
+#                    site_node::unmount -node_id [site_node::get_from_object_id -object_id $tasks_package_id]
 		    
 		}
 
