@@ -23,7 +23,7 @@ set title [_ tasks.Add_Process]
 set context [list $title]
 set package_id [ad_conn package_id]
 
-set assigneees [list]
+set assigneees {}
 foreach party $party_id {
     contact::require_visiblity -party_id $party
     if { $process_id ne "" } {

@@ -24,7 +24,7 @@ if { ![info exists export_vars_list] } {
 }
 
 set task_form_vars [list task_id names assignee_id task_prescribed task due_date status priority description comment creator]
-set export_vars [list]
+set export_vars {}
 foreach {key value} $export_vars_list {
     if { [lsearch $task_form_vars $key] < 0 } {
 	set $key $value
@@ -97,7 +97,7 @@ set assign_parties_options [list [list "       " $object_id]]
 append assign_parties_options " [db_list_of_lists get_all_users { }]"
 
 
-set names [list]
+set names {}
 foreach object $object_id {
     lappend names "<a href=\"[tasks::object_url -object_id $object]\">[db_string get_acs_object_name { select acs_object__name(:object) }]</a>"
 }
