@@ -23,7 +23,7 @@ ad_proc -public -callback contact::history -impl tasks {
 } {
     Add task history to this party. Return as list
 } {
-    set tasks {}
+    set tasks [list]
     db_foreach get_tasks {
         select t.task_id,
                t.completed_date as completion_date,
