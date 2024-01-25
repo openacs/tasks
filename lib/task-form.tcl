@@ -170,6 +170,9 @@ if { [exists_and_not_null standard_tasks_list] } {
 
 }
 
+::template::head::add_javascript \
+    -src /resources/acs-templating/calendar.js
+
 append form_elements {
     {due_date:text
 	{label "[_ tasks.Due]"}
