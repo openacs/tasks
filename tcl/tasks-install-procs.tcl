@@ -67,7 +67,7 @@ ad_proc -public tasks::install::after_upgrade {
 
 		# this switch is being made because version 1.2b4 of contacts is no longer
                 # singleton and this is the cleanest way of providing tasks to contacts 
-                # instances site wide and tasks will be used in other packages for tasks
+                # instances site-wide and tasks will be used in other packages for tasks
                 # relations.
 
 		# this will fail if more than one instance exists
